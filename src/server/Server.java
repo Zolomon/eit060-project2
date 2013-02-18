@@ -54,4 +54,13 @@ public class Server {
 			// TODO: LOG
 		}
 	}
+
+	public void deleteJournal(Journal journal, EntityWithAccessControl entity) throws AccessDeniedException {
+		try {
+			journal.delete(entity);
+		} catch (AccessDeniedException e) {
+			e.printStackTrace();
+			// TODO: LOG
+		}
+	}
 }

@@ -9,6 +9,7 @@ public class Journal {
 	private Division division;
 	private Doctor doctor;
 	private String data;
+	private boolean toDelete;
 
 	public Journal(Patient patient, Doctor doctor,
 			Nurse nurse, String data) {
@@ -53,10 +54,16 @@ public class Journal {
 	}
 	
 	public boolean delete(EntityWithAccessControl entity) throws AccessDeniedException {
-		if (entity.canAccess(this, EntityWithAccessControl.EXECUTE))
+		if (entity.canAccess(this, EntityWithAccessControl.EXECUTE)) {
+			toDelete = true;
 			return true;
+		}
 		
 		throw new AccessDeniedException("Not enough access to delete.");
+	}
+
+	public boolean toDelete() {
+		return toDelete;
 	}
 
 }

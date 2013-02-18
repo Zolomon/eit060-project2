@@ -9,6 +9,7 @@ import java.util.List;
 import server.Server;
 import util.Division;
 import util.Doctor;
+import util.GovernmentAgent;
 import util.Journal;
 import util.Nurse;
 import util.Patient;
@@ -20,6 +21,7 @@ public class TestEntities {
 	private static List<Patient> patients;
 	private static Server server;
 	private static ArrayList<Journal> journals;
+	private static GovernmentAgent agent;
 
 	public static void main(String[] args) {
 		divisions = new HashMap<Integer, Division>();
@@ -34,6 +36,7 @@ public class TestEntities {
 		divisions.put(5, new Division("Surgery Division"));
 		divisions
 				.put(6, new Division("Women's Health and Pediatrics Division"));
+		divisions.put(7, new Division("Socialstyrelsen"));
 
 		docs = new ArrayList<Doctor>();
 		docs.add(new Doctor("Fulgore d0_0", divisions.get(0)));
@@ -52,7 +55,9 @@ public class TestEntities {
 		patients.add(new Patient("Spinal p5_1", "Broken toe", divisions.get(0)));
 
 		patients.add(new Patient("Spinal p4_0", "Fractured skull", divisions
-				.get(4)));
+				.get(1)));
+
+		agent = new GovernmentAgent("FRA", divisions.get(7));
 
 		server = new Server();
 
@@ -61,10 +66,14 @@ public class TestEntities {
 			TestPatientWriteAccess();
 			TestNurseReadAccess();
 			TestNurseWriteAccess();
+			TestDoctorReadAccess();
+			TestDoctorWriteAccess();
+			TestGovernmentAgentReadAccess();
+			TestGovernmentAgentDeleteAccess();
 
 		} catch (AccessDeniedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 
@@ -141,7 +150,7 @@ public class TestEntities {
 		server.writeData(j1, nurses.get(0), actual);
 		result &= server.readData(j1, nurses.get(0)).equals(expected);
 
-		// Nurses can't write to other patient journals.
+		// Nurses are not allowed to write to other patients' journals.
 		actual = "new value 2";
 		server.writeData(j1, nurses.get(1), actual);
 		result &= server.readData(j1, nurses.get(0)).equals(expected);
@@ -150,4 +159,102 @@ public class TestEntities {
 				result ? "succeeded" : "failed"));
 	}
 
+	private static void TestDoctorReadAccess() throws AccessDeniedException {
+		// A doctor should be able to read its patient's journals, and
+		// those in the same division
+
+		Patient p0 = patients.get(0);
+		Patient p1 = patients.get(1);
+		Patient p2 = patients.get(2);
+
+		Journal j0 = server.createJournal(p0, docs.get(0), nurses.get(0));
+		Journal j1 = server.createJournal(p1, docs.get(1), nurses.get(1));
+		Journal j2 = server.createJournal(p2, docs.get(2), nurses.get(2));
+
+		boolean result = true;
+		// Doctor can read its patients' journals
+		String expected = p0.getData();
+		result &= server.readData(j0, docs.get(0)).equals(expected);
+
+		// Doctor can read its division's journals
+		expected = p1.getData();
+		result &= server.readData(j1, docs.get(0)).equals(expected);
+
+		// Doctor can't read outside its division
+		expected = p2.getData();
+		result &= server.readData(j2, docs.get(0)) == null;
+
+		System.out.println(String.format("TestDoctorReadAccess: %s",
+				result ? "succeeded" : "failed"));
+	}
+
+	private static void TestDoctorWriteAccess() throws AccessDeniedException {
+		// A doctor can write to its patients' journals, but no other.
+
+		Patient p0 = patients.get(0);
+		Patient p1 = patients.get(1);
+		Patient p2 = patients.get(2);
+
+		Journal j0 = server.createJournal(p0, docs.get(0), nurses.get(0));
+		Journal j1 = server.createJournal(p1, docs.get(1), nurses.get(1));
+		Journal j2 = server.createJournal(p2, docs.get(2), nurses.get(2));
+
+		boolean result = true;
+
+		// Doctor can write to its patient's journal
+		String actual = "new value 1";
+		String expected = "new value 1";
+		server.writeData(j0, docs.get(0), actual);
+		result &= server.readData(j0, docs.get(0)).equals(expected);
+
+		// Doctors are not allowed to write to other patients' journals.
+		actual = "new value 2";
+		expected = p1.getData();
+		server.writeData(j1, docs.get(0), actual);
+		result &= server.readData(j1, nurses.get(0)).equals(expected);
+
+		System.out.println(String.format("TestDoctorWriteAccess: %s",
+				result ? "succeeded" : "failed"));
+	}
+
+	private static void TestGovernmentAgentReadAccess()
+			throws AccessDeniedException {
+		Patient p0 = patients.get(0);
+		Patient p1 = patients.get(1);
+		Patient p2 = patients.get(2);
+
+		Journal j0 = server.createJournal(p0, docs.get(0), nurses.get(0));
+		Journal j1 = server.createJournal(p1, docs.get(1), nurses.get(1));
+		Journal j2 = server.createJournal(p2, docs.get(2), nurses.get(2));
+
+		boolean result = true;
+		// Doctor can read its patients' journals
+		String expected = p0.getData();
+		result &= server.readData(j0, agent).equals(expected);
+
+		// Doctor can read its division's journals
+		expected = p1.getData();
+		result &= server.readData(j1, agent).equals(expected);
+
+		// Doctor can't read outside its division
+		expected = p2.getData();
+		result &= server.readData(j2, agent).equals(expected);
+
+		System.out.println(String.format("TestGovernmentAgentReadAccess: %s",
+				result ? "succeeded" : "failed"));
+	}
+
+	private static void TestGovernmentAgentDeleteAccess() throws AccessDeniedException {
+		Patient p0 = patients.get(0);
+
+		Journal j0 = server.createJournal(p0, docs.get(0), nurses.get(0));
+
+		boolean result = true;
+		// Doctor can read its patients' journals
+		server.deleteJournal(j0, agent);
+		result &= j0.toDelete() == true;
+
+		System.out.println(String.format("TestGovernmentAgentDeleteAccess: %s",
+				result ? "succeeded" : "failed"));
+	}
 }
