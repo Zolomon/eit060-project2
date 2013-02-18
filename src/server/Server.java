@@ -17,13 +17,15 @@ public class Server {
 		}
 	}
 
-	public Journal createJournal(Patient p0, Doctor doctor,
-			Nurse nurse) throws InvalidParameterException {
-		if (p0.getDivision() != nurse.getDivision() && nurse.getDivision() != doctor.getDivision()) {
+	public Journal createJournal(Patient p0, Doctor doctor, Nurse nurse)
+			throws InvalidParameterException {
+		if (p0.getDivision() != nurse.getDivision()
+				&& nurse.getDivision() != doctor.getDivision()) {
 			throw new InvalidParameterException(
 					String.format(
 							"Nurse [%s] is not from the same division [%s] as doctor [%s]",
-							nurse.getId(), p0.getDivision().getId(), doctor.getId()));
+							nurse.getId(), p0.getDivision().getId(),
+							doctor.getId()));
 			// TODO: Log
 		}
 
@@ -31,8 +33,9 @@ public class Server {
 
 		return j;
 	}
-	
-	public String readData(Journal journal, EntityWithAccessControl entity) throws AccessDeniedException {
+
+	public String readData(Journal journal, EntityWithAccessControl entity)
+			throws AccessDeniedException {
 		try {
 			return journal.readData(entity);
 		} catch (AccessDeniedException e) {
@@ -40,5 +43,15 @@ public class Server {
 			// TODO: LOG
 		}
 		return null;
+	}
+
+	public void writeData(Journal journal, EntityWithAccessControl entity,
+			String data) throws AccessDeniedException {
+		try {
+			journal.writeData(entity, data);
+		} catch (AccessDeniedException e) {
+			e.printStackTrace();
+			// TODO: LOG
+		}
 	}
 }
