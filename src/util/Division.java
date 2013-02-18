@@ -7,7 +7,7 @@ public class Division {
 		this.name = name;
 	}
 	
-	public String getName() {
+	public String getId() {
 		return name;
 	}
 }

@@ -14,7 +14,12 @@ public class Doctor extends Entity {
 		if (access == EntityWithAccessControl.READ
 				&& journal.getDivision() == this.getDivision())
 			return true;
-		
+
+		// To create a new journal
+		if (access == EntityWithAccessControl.EXECUTE
+				&& journal.getDivision() == this.getDivision())
+			return true;
+
 		return false;
 	}
 

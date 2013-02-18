@@ -8,7 +8,11 @@ public class Patient extends Entity {
 		super(id, division);
 		this.data = data;
 	}
-
+	
+	public String getData() {
+		return this.data;
+	}
+	
 	@Override
 	public boolean canAccess(Journal journal, int access) {
 		if (access == EntityWithAccessControl.READ && journal.getPatient() == this)

@@ -10,9 +10,9 @@ public class Journal {
 	private Doctor doctor;
 	private String data;
 
-	public Journal(Patient patient, Division division, Doctor doctor,
+	public Journal(Patient patient, Doctor doctor,
 			Nurse nurse, String data) {
-		this.division = division;
+		this.division = patient.getDivision();
 		this.doctor = doctor;
 		this.nurse = nurse;
 		this.patient = patient;
@@ -35,13 +35,12 @@ public class Journal {
 		return division;
 	}
 
-	public String getData(EntityWithAccessControl entity)
+	public String readData(EntityWithAccessControl entity)
 			throws AccessDeniedException {
 		if (entity.canAccess(this, EntityWithAccessControl.READ))
 			return this.data;
 
 		throw new AccessDeniedException("Not enough access to read.");
-		// FIXME: LOG
 	}
 
 	public void writeData(EntityWithAccessControl entity, String data)
@@ -51,7 +50,6 @@ public class Journal {
 			return;
 		}
 		throw new AccessDeniedException("Not enough access to write.");
-		// FIXME: LOG
 	}
 	
 	public boolean delete(EntityWithAccessControl entity) throws AccessDeniedException {
