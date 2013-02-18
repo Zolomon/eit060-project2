@@ -1,14 +1,11 @@
 package util;
 
 public class Patient extends Entity {
-	private String name;
 	private String data;
 	
 	
-	public Patient(String name, String data, Division division) {
-		super(division);
-		
-		this.name = name;
+	public Patient(String id, String data, Division division) {
+		super(id, division);
 		this.data = data;
 	}
 

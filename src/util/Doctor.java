@@ -2,8 +2,8 @@ package util;
 
 public class Doctor extends Entity {
 
-	public Doctor(Division division) {
-		super(division);
+	public Doctor(String id, Division division) {
+		super(id, division);
 	}
 
 	@Override

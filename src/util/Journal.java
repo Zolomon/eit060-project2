@@ -40,7 +40,7 @@ public class Journal {
 		if (entity.canAccess(this, EntityWithAccessControl.READ))
 			return this.data;
 
-		throw new AccessDeniedException("Not enough access.");
+		throw new AccessDeniedException("Not enough access to read.");
 		// FIXME: LOG
 	}
 
@@ -50,8 +50,15 @@ public class Journal {
 			this.data = data;
 			return;
 		}
-		throw new AccessDeniedException("Not enough access.");
+		throw new AccessDeniedException("Not enough access to write.");
 		// FIXME: LOG
+	}
+	
+	public boolean delete(EntityWithAccessControl entity) throws AccessDeniedException {
+		if (entity.canAccess(this, EntityWithAccessControl.EXECUTE))
+			return true;
+		
+		throw new AccessDeniedException("Not enough access to delete.");
 	}
 
 }
