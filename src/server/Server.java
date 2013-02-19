@@ -9,6 +9,7 @@ import util.*;
 
 public class Server {
 	private List<Journal> journals = new ArrayList<Journal>();
+	private Log log = new log;
 
 	public static void main(String[] args) {
 
@@ -30,7 +31,10 @@ public class Server {
 		}
 
 		Journal j = new Journal(p0, doctor, nurse, p0.getData());
-
+		
+		//log update in true case
+		log.updateLog(new Events(1, doctor, j, true));
+		
 		return j;
 	}
 
