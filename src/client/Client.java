@@ -1,5 +1,8 @@
 package client;
 
+import javax.net.ssl.*;
+import java.security.*;
+
 public class Client {
 
 	public static void main(String[] args) {
@@ -9,5 +12,8 @@ public class Client {
 		}
 		
 	}
-
+	
+	private boolean initiateHandshake(){
+	
+	
 }

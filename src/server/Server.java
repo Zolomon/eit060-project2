@@ -12,7 +12,10 @@ import util.*;
 public class Server {
 	private List<Journal> journals = new ArrayList<Journal>();
 	private Log log = new log;
-
+	
+	//trying to initate a SSLSocketfactory to the handshake
+	private SSLSocketFactory socketFac = SSLSocketFactory.getDefault;
+	
 	public static void main(String[] args) {
 
 		while (true) {
