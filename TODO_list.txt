@@ -1,1 +1,6 @@
 TODO-list
+* ssl förbindelse
+* challelnge-response
+* rapport
+* client
+* 
