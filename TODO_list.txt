@@ -1,6 +1,7 @@
 TODO-list
-* ssl förbindelse
+* ssl förbindelse, truststore hos både server och client, CA, keystore, handshake
 * challelnge-response
 * rapport
 * client
-* 
+* log
+intressant att inte en goverment agency skall kunna utföra "write"
