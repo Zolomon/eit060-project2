@@ -4,4 +4,7 @@ TODO-list
 * rapport
 * client
 * log
+* create SSL sockets and SSL engine, ingår i JSSE?
 intressant att inte en goverment agency skall kunna utföra "write"
+Skulle vi implemetera någon form av lösenord? Eller skulle det finnas med i
+certifikaten?
