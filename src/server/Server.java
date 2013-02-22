@@ -17,15 +17,15 @@ import util.*;
 
 public class Server {
 	private List<Journal> journals = new ArrayList<Journal>();
-	private Log log = new log;
+	private Log log = new Log();
 	
-	//trying to initate a SSLSocketfactory to the handshake
-	private SSLSocketFactory socketFac = SSLSocketFactory.getDefault;
+	//trying to initiate a SSLSocketfactory to the handshake
+	private SSLServerSocketFactory  socketFac = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 	
 	public static void main(String[] args) {
 
 		// Temporary tcp-connection
-		// TODO: FIXME: Make this an SSLsocket instead...
+		// TODO: FIXME: Make this an SSLServersocket instead...
 		ServerSocket ss;
 		try {
 			ss = new ServerSocket(6789);
@@ -35,7 +35,7 @@ public class Server {
 			Socket client;
 			BufferedReader fromClient;
 			DataOutputStream toClient;
-			String readLine;
+			String readLine = null;
 
 			while (true) {
 				client = ss.accept();
@@ -48,6 +48,20 @@ public class Server {
 				loginClient(fromClient, toClient);
 				
 				while (!readLine.equals("quit")) {
+					
+					/*
+					 *  Commands:
+					 *  
+					 *  All:
+					 *  list records
+					 *  read record id
+					 *  
+					 *  Patient:
+					 *  
+					 *  
+					 *  Nurse:
+					 *  
+					 */
 					
 				}
 

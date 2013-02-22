@@ -1,3 +1,8 @@
+package server;
+
+import util.EntityWithAccessControl;
+import util.Journal;
+
 
 public class Events {
 	private int eventClassId;

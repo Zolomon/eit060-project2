@@ -15,5 +15,6 @@ public class Client {
 	
 	private boolean initiateHandshake(){
 	
-	
+		return false;
+	}
 }
