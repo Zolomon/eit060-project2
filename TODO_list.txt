@@ -1,0 +1,13 @@
+TODO-list
+* ssl f�rbindelse, truststore hos b�de server och client, CA, keystore, handshake
+* challelnge-response
+* rapport
+* client
+* log
+* create SSL sockets and SSL engine, ing�r i JSSE?
+intressant att inte en goverment agency skall kunna utf�ra "write"
+Skulle vi implemetera n�gon form av l�senord? Eller skulle det finnas med i
+certifikaten?
+
+Bengt: Enligt Martin idag på föreläsningen så skulle "lösenordet" 
+inkluderas i SSL-anslutningen på något sätt? Exakt hur vet jag ej. 

@@ -34,8 +34,7 @@ public class TestEntities {
 		divisions.put(3, new Division("Neurology Division"));
 		divisions.put(4, new Division("Psychiatry Division"));
 		divisions.put(5, new Division("Surgery Division"));
-		divisions
-				.put(6, new Division("Women's Health and Pediatrics Division"));
+		divisions.put(6, new Division("Women's Health and Pediatrics Division"));
 		divisions.put(7, new Division("Socialstyrelsen"));
 
 		docs = new ArrayList<Doctor>();

@@ -10,12 +10,18 @@ import java.nio.file.AccessDeniedException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.net.ssl.*;
+import java.security.*;
 
 import util.*;
 
 public class Server {
 	private List<Journal> journals = new ArrayList<Journal>();
-
+	private Log log = new log;
+	
+	//trying to initate a SSLSocketfactory to the handshake
+	private SSLSocketFactory socketFac = SSLSocketFactory.getDefault;
+	
 	public static void main(String[] args) {
 
 		// Temporary tcp-connection
@@ -75,7 +81,10 @@ public class Server {
 		}
 
 		Journal j = new Journal(p0, doctor, nurse, p0.getData());
-
+		
+		//log update in true case.
+		log.updateLog(new Events(1, doctor, j, true));
+		
 		return j;
 	}
 
