@@ -244,7 +244,8 @@ public class TestEntities {
 				result ? "succeeded" : "failed"));
 	}
 
-	private static void TestGovernmentAgentDeleteAccess() throws AccessDeniedException {
+	private static void TestGovernmentAgentDeleteAccess()
+			throws AccessDeniedException {
 		Patient p0 = patients.get(0);
 
 		Journal j0 = server.createJournal(p0, docs.get(0), nurses.get(0));

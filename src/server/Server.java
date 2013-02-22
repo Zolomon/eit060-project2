@@ -1,5 +1,11 @@
 package server;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.file.AccessDeniedException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -12,9 +18,48 @@ public class Server {
 
 	public static void main(String[] args) {
 
-		while (true) {
+		// Temporary tcp-connection
+		// TODO: FIXME: Make this an SSLsocket instead...
+		ServerSocket ss;
+		try {
+			ss = new ServerSocket(6789);
+
 			System.out.println("Running server ...");
+
+			Socket client;
+			BufferedReader fromClient;
+			DataOutputStream toClient;
+			String readLine;
+
+			while (true) {
+				client = ss.accept();
+
+				fromClient = new BufferedReader(new InputStreamReader(
+						client.getInputStream()));
+				toClient = new DataOutputStream(client.getOutputStream());
+
+				
+				loginClient(fromClient, toClient);
+				
+				while (!readLine.equals("quit")) {
+					
+				}
+
+				
+				
+				// Check username
+
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+	}
+
+	private static void loginClient(BufferedReader fromClient,
+			DataOutputStream toClient) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	public Journal createJournal(Patient p0, Doctor doctor, Nurse nurse)
@@ -55,7 +100,8 @@ public class Server {
 		}
 	}
 
-	public void deleteJournal(Journal journal, EntityWithAccessControl entity) throws AccessDeniedException {
+	public void deleteJournal(Journal journal, EntityWithAccessControl entity)
+			throws AccessDeniedException {
 		try {
 			journal.delete(entity);
 		} catch (AccessDeniedException e) {
