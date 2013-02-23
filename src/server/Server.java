@@ -19,6 +19,10 @@ import javax.net.ssl.*;
 import java.security.*;
 
 import util.*;
+import util.logger.EntityAccessDeniedLogEvent;
+import util.logger.EntityAccessLogEvent;
+import util.logger.Log;
+import util.logger.LogEvent;
 
 public class Server {
 	private static HashMap<Integer, Division> divisions;
@@ -28,7 +32,9 @@ public class Server {
 	private static ArrayList<Record> records;
 
 	private static GovernmentAgent agent;
-	private static Log log = new Log();
+	private static Log log = new Log(System.out);
+
+	private static Entity currentEntityUser;
 
 	// trying to initiate a SSLSocketfactory to the handshake
 	private SSLServerSocketFactory socketFac = (SSLServerSocketFactory) SSLServerSocketFactory
@@ -116,12 +122,12 @@ public class Server {
 
 		// Temporary tcp-connection
 		// TODO: FIXME: Make this an SSLServersocket instead...
-		//SSLSocket ss;
+		// SSLSocket ss;
 		ServerSocket ss;
-		
+
 		try {
-			//creates server socket
-			//ss = socketFac.createServerSocket();
+			// creates server socket
+			// ss = socketFac.createServerSocket();
 			ss = new ServerSocket(6789);
 
 			System.out.println("Running server ...");
@@ -132,19 +138,20 @@ public class Server {
 			String readLine = null;
 
 			while (true) {
-			
-			//listens on a connection
-			//do we need to bind it?
-			//SSLSocket socket =(SSLSocket)ss.accept();
-			
-			//sets up the handshake
-			//SSLSession session = socket.getSession();
-			
-			//forces the client to authenticate itself. Men hur gör //man det?
-			//TODO server sends it's cert to client
-			//TODO SSLengine
-				//socket.setNeedClientAuth(true);
-				
+
+				// listens on a connection
+				// do we need to bind it?
+				// SSLSocket socket =(SSLSocket)ss.accept();
+
+				// sets up the handshake
+				// SSLSession session = socket.getSession();
+
+				// forces the client to authenticate itself. Men hur gör //man
+				// det?
+				// TODO server sends it's cert to client
+				// TODO SSLengine
+				// socket.setNeedClientAuth(true);
+
 				client = ss.accept();
 				System.out.println("Client connected ...");
 
@@ -152,36 +159,37 @@ public class Server {
 						client.getInputStream()));
 				toClient = new DataOutputStream(client.getOutputStream());
 				// TODO: Fix login, fetch real logged in entity
-				Entity entity = patients.get(0);
+				currentEntityUser = patients.get(0);
 
-				toClient.writeBytes(String.format("Welcome %s! %s\n\n", entity.getName(), entity.getClass().getName()));
-				
+				toClient.writeBytes(String.format("Welcome %s! %s\n\n",
+						currentEntityUser.getName(), currentEntityUser
+								.getClass().getName()));
+
 				loginClient(fromClient, toClient);
-				
 
 				do {
 					toClient.writeBytes("Enter your command: ");
 					readLine = fromClient.readLine();
-					
+
 					for (Entry<String, Pattern> e : commands.entrySet()) {
 						if (e.getValue().matcher(readLine).matches()) {
-							toClient.writeChars(handleCommand(entity,
-									e.getKey(), e.getValue()));
+							toClient.writeChars(handleCommand(
+									currentEntityUser, e.getKey(), e.getValue()));
 						}
 					}
 				} while (readLine != null && !readLine.equals("quit"));
-					
-				
+
 				// Check username
-				//trying to get the name of the "client"
-				//	X509Certificate cert = (X509Certificate)session getPeerCertificateChain()[0];
-				//	String subject = cert.getSubjectDN().getName();
-				//	System.out.println (subject);
+				// trying to get the name of the "client"
+				// X509Certificate cert = (X509Certificate)session
+				// getPeerCertificateChain()[0];
+				// String subject = cert.getSubjectDN().getName();
+				// System.out.println (subject);
 
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e.toString()));
 		}
 	}
 
@@ -235,9 +243,14 @@ public class Server {
 			Nurse nurse) throws InvalidParameterException {
 		if (patient.getDivision() != nurse.getDivision()
 				&& nurse.getDivision() != doctor.getDivision()) {
-			//logs the false case. Should message be included?
-			log.updateLog(new Events(1, doctor, null, false));
-			
+			// logs the false case. Should message be included?
+			log.updateLog(new LogEvent(
+					Log.LVL_ERROR,
+					"RUNTIME ERROR",
+					String.format(
+							"Patient #%d, Nurse #%d, Doctor #%d not in same division",
+							patient.getId(), nurse.getId(), doctor.getId())));
+
 			throw new InvalidParameterException(
 					String.format(
 							"Nurse [%s] is not from the same division [%s] as doctor [%s]",
@@ -248,49 +261,49 @@ public class Server {
 		Record j = new Record(patient, doctor, nurse, patient.getData());
 
 		// log update in true case.
-		log.updateLog(new Events(1, doctor, j, true));
+		log.updateLog(new EntityAccessLogEvent(doctor, j, EntityWithAccessControl.EXECUTE));
 
 		return j;
 	}
 
-	public String readData(Record journal, EntityWithAccessControl entity)
+	public String readData(Record record, Entity entity)
 			throws AccessDeniedException {
 		try {
-			return journal.readData(entity);
+			return record.readData(entity);
 		} catch (AccessDeniedException e) {
-		
-		//logs in false case
-		log.updateLog(new Events(2, entity, journal, false));
+
+			// logs in false case
+			log.updateLog(new EntityAccessDeniedLogEvent(entity, record, EntityWithAccessControl.READ));
 			e.printStackTrace();
 		}
-		//logs in true case
-		log.updateLog(new Events(2, entity, journal, true));
+		// logs in true case
+		log.updateLog(new EntityAccessLogEvent(entity, record, EntityWithAccessControl.READ));
 		return null;
 	}
 
-	public void writeData(Record journal, EntityWithAccessControl entity,
+	public void writeData(Record record, Entity entity,
 			String data) throws AccessDeniedException {
 		try {
-			journal.writeData(entity, data);
+			record.writeData(entity, data);
 		} catch (AccessDeniedException e) {
-			//logs in false case
-			log.updateLog(new Events(3, entity, journal, false));
+			// logs in false case
+			log.updateLog(new EntityAccessDeniedLogEvent(entity, record, EntityWithAccessControl.READ));
 			e.printStackTrace();
 		}
-		//logs in true case
-		log.updateLog(new Events(3, entity, journal, true));
+		// logs in true case
+		log.updateLog(new EntityAccessLogEvent(entity, record, EntityWithAccessControl.READ));
 	}
 
-	public void deleteJournal(Record journal, EntityWithAccessControl entity)
+	public void deleteJournal(Record record, Entity entity)
 			throws AccessDeniedException {
 		try {
-			journal.delete(entity);
+			record.delete(entity);
 		} catch (AccessDeniedException e) {
-		//logs in false case
-		log.updateLog(new Events(4, entity, journal, false));
+			// logs in false case
+			log.updateLog(new EntityAccessDeniedLogEvent(entity, record, EntityWithAccessControl.READ));
 			e.printStackTrace();
 		}
-		//logs in true case
-		log.updateLog(new Events(4, entity, journal, true));
+		// logs in true case
+		log.updateLog(new EntityAccessLogEvent(entity, record, EntityWithAccessControl.READ));
 	}
 }

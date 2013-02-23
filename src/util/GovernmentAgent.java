@@ -4,6 +4,7 @@ public class GovernmentAgent extends Entity {
 
 	public GovernmentAgent(String id, Division division) {
 		super(id, division);
+		this.myType = "GovernmentAgent";
 	}
 
 	@Override

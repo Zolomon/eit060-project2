@@ -4,6 +4,7 @@ public class Nurse extends Entity {
 
 	public Nurse(String id, Division division) {
 		super(id, division);
+		this.myType = "Nurse";
 	}
 
 	@Override

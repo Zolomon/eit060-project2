@@ -7,6 +7,7 @@ public class Patient extends Entity {
 	public Patient(String id, String data, Division division) {
 		super(id, division);
 		this.data = data;
+		this.myType = "Patient";
 	}
 	
 	public String getData() {

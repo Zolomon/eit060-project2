@@ -5,6 +5,7 @@ public abstract class Entity implements EntityWithAccessControl {
 	private String name;
 	private static int id;
 	private int myId;
+	protected String myType = "Entity";
 	
 	public Entity(String name, Division division) {
 		this.name = name;
@@ -22,5 +23,9 @@ public abstract class Entity implements EntityWithAccessControl {
 	
 	public Division getDivision() {
 		return division;
+	}
+
+	public String getType() {
+		return myType;
 	}
 }
