@@ -16,8 +16,6 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.*;
 
-import com.sun.org.apache.xerces.internal.impl.dv.dtd.ENTITYDatatypeValidator;
-
 import java.security.*;
 
 import util.*;
@@ -171,7 +169,7 @@ public class Server {
 									e.getKey(), e.getValue()));
 						}
 					}
-				} while (readLine != null && readLine.equals("quit"));
+				} while (readLine != null && !readLine.equals("quit"));
 					
 				
 				// Check username
