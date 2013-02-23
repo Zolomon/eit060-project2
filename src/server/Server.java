@@ -48,7 +48,7 @@ public class Server {
 			//sets up the handshake
 			SSLSession session = socket.getSession();
 			
-			//forces the client to authenticate itself
+			//forces the client to authenticate itself. Men hur gör //man det?
 				socket.setNeedClientAuth(true);
 				
 				client = ss.accept();
@@ -104,7 +104,9 @@ public class Server {
 							"Nurse [%s] is not from the same division [%s] as doctor [%s]",
 							nurse.getId(), p0.getDivision().getId(),
 							doctor.getId()));
-			// TODO: Log
+			
+			//logs the false case. Should message be included?
+			log.updateLog(new Events(1, doctor, null, false));
 		}
 
 		Journal j = new Journal(p0, doctor, nurse, p0.getData());
@@ -120,9 +122,13 @@ public class Server {
 		try {
 			return journal.readData(entity);
 		} catch (AccessDeniedException e) {
+		
+		//logs in false case
+		log.updateLog(new Events(2, entity, journal, false));
 			e.printStackTrace();
-			// TODO: LOG
 		}
+		//logs in true case
+		log.updateLog(new Events(2, entity, journal, true));
 		return null;
 	}
 
@@ -131,9 +137,12 @@ public class Server {
 		try {
 			journal.writeData(entity, data);
 		} catch (AccessDeniedException e) {
+			//logs in false case
+			log.updateLog(new Events(3, entity, journal, false));
 			e.printStackTrace();
-			// TODO: LOG
 		}
+		//logs in true case
+		log.updateLog(new Events(3, entity, journal, true));
 	}
 
 	public void deleteJournal(Journal journal, EntityWithAccessControl entity)
@@ -141,8 +150,11 @@ public class Server {
 		try {
 			journal.delete(entity);
 		} catch (AccessDeniedException e) {
+		//logs in false case
+		log.updateLog(new Events(4, entity, journal, false));
 			e.printStackTrace();
-			// TODO: LOG
 		}
+		//logs in true case
+		log.updateLog(new Events(4, entity, journal, true));
 	}
 }
