@@ -26,9 +26,11 @@ public class Server {
 
 		// Temporary tcp-connection
 		// TODO: FIXME: Make this an SSLServersocket instead...
-		ServerSocket ss;
+		SSLSocket ss;
 		try {
-			ss = new ServerSocket(6789);
+		
+			//creates server socket
+			ss = socketFac.createServerSocket();
 
 			System.out.println("Running server ...");
 
@@ -38,6 +40,17 @@ public class Server {
 			String readLine = null;
 
 			while (true) {
+			
+			//listens on a connection
+			//do we need to bind it?
+			SSLSocket socket =(SSLSocket)ss.accept();
+			
+			//sets up the handshake
+			SSLSession session = socket.getSession();
+			
+			//forces the client to authenticate itself
+				socket.setNeedClientAuth(true);
+				
 				client = ss.accept();
 
 				fromClient = new BufferedReader(new InputStreamReader(
