@@ -10,7 +10,7 @@ import server.Server;
 import util.Division;
 import util.Doctor;
 import util.GovernmentAgent;
-import util.Journal;
+import util.Record;
 import util.Nurse;
 import util.Patient;
 
@@ -20,7 +20,7 @@ public class TestEntities {
 	private static List<Nurse> nurses;
 	private static List<Patient> patients;
 	private static Server server;
-	private static ArrayList<Journal> journals;
+	private static ArrayList<Record> journals;
 	private static GovernmentAgent agent;
 
 	public static void main(String[] args) {
@@ -80,7 +80,7 @@ public class TestEntities {
 		// A pateint should only be able to read patient's own journal.
 
 		Patient p0 = patients.get(0);
-		Journal j = server.createJournal(p0, docs.get(0), nurses.get(0));
+		Record j = server.createJournal(p0, docs.get(0), nurses.get(0));
 		boolean result = true;
 
 		result &= server.readData(j, p0).equals(p0.getData());
@@ -94,7 +94,7 @@ public class TestEntities {
 		// A patient should be able to write to no journals.
 
 		Patient p0 = patients.get(0);
-		Journal j1 = server.createJournal(p0, docs.get(0), nurses.get(0));
+		Record j1 = server.createJournal(p0, docs.get(0), nurses.get(0));
 
 		boolean result = true;
 		// Patient's can't write to any journal.
@@ -118,8 +118,8 @@ public class TestEntities {
 
 		Patient p0 = patients.get(0);
 		Patient p1 = patients.get(1);
-		Journal j1 = server.createJournal(p0, docs.get(0), nurses.get(0));
-		Journal j2 = server.createJournal(p1, docs.get(0), nurses.get(0));
+		Record j1 = server.createJournal(p0, docs.get(0), nurses.get(0));
+		Record j2 = server.createJournal(p1, docs.get(0), nurses.get(0));
 		boolean result = true;
 		// Nurse can read its patient's journal
 		result &= server.readData(j1, nurses.get(0)).equals(p0.getData());
@@ -140,7 +140,7 @@ public class TestEntities {
 		// noone else's.
 
 		Patient p0 = patients.get(0);
-		Journal j1 = server.createJournal(p0, docs.get(0), nurses.get(0));
+		Record j1 = server.createJournal(p0, docs.get(0), nurses.get(0));
 
 		boolean result = true;
 		// Nurse can write to its patient's journal
@@ -166,9 +166,9 @@ public class TestEntities {
 		Patient p1 = patients.get(1);
 		Patient p2 = patients.get(2);
 
-		Journal j0 = server.createJournal(p0, docs.get(0), nurses.get(0));
-		Journal j1 = server.createJournal(p1, docs.get(1), nurses.get(1));
-		Journal j2 = server.createJournal(p2, docs.get(2), nurses.get(2));
+		Record j0 = server.createJournal(p0, docs.get(0), nurses.get(0));
+		Record j1 = server.createJournal(p1, docs.get(1), nurses.get(1));
+		Record j2 = server.createJournal(p2, docs.get(2), nurses.get(2));
 
 		boolean result = true;
 		// Doctor can read its patients' journals
@@ -194,9 +194,9 @@ public class TestEntities {
 		Patient p1 = patients.get(1);
 		Patient p2 = patients.get(2);
 
-		Journal j0 = server.createJournal(p0, docs.get(0), nurses.get(0));
-		Journal j1 = server.createJournal(p1, docs.get(1), nurses.get(1));
-		Journal j2 = server.createJournal(p2, docs.get(2), nurses.get(2));
+		Record j0 = server.createJournal(p0, docs.get(0), nurses.get(0));
+		Record j1 = server.createJournal(p1, docs.get(1), nurses.get(1));
+		Record j2 = server.createJournal(p2, docs.get(2), nurses.get(2));
 
 		boolean result = true;
 
@@ -222,9 +222,9 @@ public class TestEntities {
 		Patient p1 = patients.get(1);
 		Patient p2 = patients.get(2);
 
-		Journal j0 = server.createJournal(p0, docs.get(0), nurses.get(0));
-		Journal j1 = server.createJournal(p1, docs.get(1), nurses.get(1));
-		Journal j2 = server.createJournal(p2, docs.get(2), nurses.get(2));
+		Record j0 = server.createJournal(p0, docs.get(0), nurses.get(0));
+		Record j1 = server.createJournal(p1, docs.get(1), nurses.get(1));
+		Record j2 = server.createJournal(p2, docs.get(2), nurses.get(2));
 
 		boolean result = true;
 		// Doctor can read its patients' journals
@@ -247,7 +247,7 @@ public class TestEntities {
 			throws AccessDeniedException {
 		Patient p0 = patients.get(0);
 
-		Journal j0 = server.createJournal(p0, docs.get(0), nurses.get(0));
+		Record j0 = server.createJournal(p0, docs.get(0), nurses.get(0));
 
 		boolean result = true;
 		// Doctor can read its patients' journals

@@ -1,19 +1,19 @@
 package server;
 
 import util.EntityWithAccessControl;
-import util.Journal;
+import util.Record;
 
 
 public class Events {
 	private int eventClassId;
 	private EntityWithAccessControl entity;
-	private Journal journal;
+	private Record record;
 	private boolean failEvent;
 	
-	public Events(int eventClassId, EntityWithAccessControl entity, Journal journal, boolean failEvent){
+	public Events(int eventClassId, EntityWithAccessControl entity, Record journal, boolean failEvent){
 		this.eventClassId = eventClassId;
 		this.entity = entity;
-		this.journal = journal;
+		this.record = journal;
 		this.failEvent = failEvent;
 	}
 	

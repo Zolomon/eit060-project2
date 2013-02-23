@@ -1,6 +1,5 @@
 package client;
 
-import javax.net.ssl.*;
 import java.security.*;
 
 public class Client {

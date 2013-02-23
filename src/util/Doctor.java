@@ -2,12 +2,12 @@ package util;
 
 public class Doctor extends Entity {
 
-	public Doctor(String id, Division division) {
-		super(id, division);
+	public Doctor(String name, Division division) {
+		super(name, division);
 	}
 
 	@Override
-	public boolean canAccess(Journal journal, int access) {
+	public boolean canAccess(Record journal, int access) {
 		if ((access == EntityWithAccessControl.READ || access == EntityWithAccessControl.WRITE)
 				&& journal.getDoctor() == this)
 			return true;

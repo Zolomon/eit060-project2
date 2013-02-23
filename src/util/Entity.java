@@ -2,15 +2,22 @@ package util;
 
 public abstract class Entity implements EntityWithAccessControl {
 	private Division division;
-	private String id;
+	private String name;
+	private static int id;
+	private int myId;
 	
-	public Entity(String id, Division division) {
-		this.id = id;
+	public Entity(String name, Division division) {
+		this.name = name;
 		this.division = division;
+		this.myId = id++;
 	}
 	
-	public String getId() {
-		return id;
+	public int getId() {
+		return myId;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public Division getDivision() {

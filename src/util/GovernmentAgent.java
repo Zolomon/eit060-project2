@@ -7,7 +7,7 @@ public class GovernmentAgent extends Entity {
 	}
 
 	@Override
-	public boolean canAccess(Journal journal, int access) {
+	public boolean canAccess(Record journal, int access) {
 		if (access == EntityWithAccessControl.READ)
 			return true;
 

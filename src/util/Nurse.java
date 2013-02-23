@@ -7,7 +7,7 @@ public class Nurse extends Entity {
 	}
 
 	@Override
-	public boolean canAccess(Journal journal, int access) {
+	public boolean canAccess(Record journal, int access) {
 		if ((access == EntityWithAccessControl.READ || access == EntityWithAccessControl.WRITE)
 				&& journal.getNurse() == this)
 			return true;
