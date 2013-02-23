@@ -11,3 +11,6 @@ certifikaten?
 
 Bengt: Enligt Martin idag på föreläsningen så skulle "lösenordet" 
 inkluderas i SSL-anslutningen på något sätt? Exakt hur vet jag ej. 
+
+Tobbe: Behöver man skapa en egen SSLSocketFactory som implemnterar det gränssnittet eller 
+kan man skapa en socket direkt i till exempel server klassen?
