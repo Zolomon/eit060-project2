@@ -118,8 +118,12 @@ public class Server {
 
 		// Temporary tcp-connection
 		// TODO: FIXME: Make this an SSLServersocket instead...
+		//SSLSocket ss;
 		ServerSocket ss;
+		
 		try {
+			//creates server socket
+			//ss = socketFac.createServerSocket();
 			ss = new ServerSocket(6789);
 
 			System.out.println("Running server ...");
@@ -130,13 +134,25 @@ public class Server {
 			String readLine = null;
 
 			while (true) {
+			
+			//listens on a connection
+			//do we need to bind it?
+			//SSLSocket socket =(SSLSocket)ss.accept();
+			
+			//sets up the handshake
+			//SSLSession session = socket.getSession();
+			
+			//forces the client to authenticate itself. Men hur gör //man det?
+			//TODO server sends it's cert to client
+			//TODO SSLengine
+				//socket.setNeedClientAuth(true);
+				
 				client = ss.accept();
 				System.out.println("Client connected ...");
 
 				fromClient = new BufferedReader(new InputStreamReader(
 						client.getInputStream()));
 				toClient = new DataOutputStream(client.getOutputStream());
-
 				// TODO: Fix login, fetch real logged in entity
 				Entity entity = patients.get(0);
 
@@ -156,8 +172,13 @@ public class Server {
 						}
 					}
 				} while (readLine != null && readLine.equals("quit"));
+					
 				
 				// Check username
+				//trying to get the name of the "client"
+				//	X509Certificate cert = (X509Certificate)session getPeerCertificateChain()[0];
+				//	String subject = cert.getSubjectDN().getName();
+				//	System.out.println (subject);
 
 			}
 		} catch (IOException e) {
@@ -216,12 +237,14 @@ public class Server {
 			Nurse nurse) throws InvalidParameterException {
 		if (patient.getDivision() != nurse.getDivision()
 				&& nurse.getDivision() != doctor.getDivision()) {
+			//logs the false case. Should message be included?
+			log.updateLog(new Events(1, doctor, null, false));
+			
 			throw new InvalidParameterException(
 					String.format(
 							"Nurse [%s] is not from the same division [%s] as doctor [%s]",
 							nurse.getName(), patient.getDivision().getId(),
 							doctor.getName()));
-			// TODO: Log
 		}
 
 		Record j = new Record(patient, doctor, nurse, patient.getData());
@@ -237,9 +260,13 @@ public class Server {
 		try {
 			return journal.readData(entity);
 		} catch (AccessDeniedException e) {
+		
+		//logs in false case
+		log.updateLog(new Events(2, entity, journal, false));
 			e.printStackTrace();
-			// TODO: LOG
 		}
+		//logs in true case
+		log.updateLog(new Events(2, entity, journal, true));
 		return null;
 	}
 
@@ -248,9 +275,12 @@ public class Server {
 		try {
 			journal.writeData(entity, data);
 		} catch (AccessDeniedException e) {
+			//logs in false case
+			log.updateLog(new Events(3, entity, journal, false));
 			e.printStackTrace();
-			// TODO: LOG
 		}
+		//logs in true case
+		log.updateLog(new Events(3, entity, journal, true));
 	}
 
 	public void deleteJournal(Record journal, EntityWithAccessControl entity)
@@ -258,8 +288,11 @@ public class Server {
 		try {
 			journal.delete(entity);
 		} catch (AccessDeniedException e) {
+		//logs in false case
+		log.updateLog(new Events(4, entity, journal, false));
 			e.printStackTrace();
-			// TODO: LOG
 		}
+		//logs in true case
+		log.updateLog(new Events(4, entity, journal, true));
 	}
 }

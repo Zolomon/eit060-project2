@@ -3,7 +3,7 @@ TODO-list
 * challelnge-response
 * rapport
 * client
-* log
+* log DONE?
 * create SSL sockets and SSL engine, ing�r i JSSE?
 intressant att inte en goverment agency skall kunna utf�ra "write"
 Skulle vi implemetera n�gon form av l�senord? Eller skulle det finnas med i
@@ -11,3 +11,7 @@ certifikaten?
 
 Bengt: Enligt Martin idag på föreläsningen så skulle "lösenordet" 
 inkluderas i SSL-anslutningen på något sätt? Exakt hur vet jag ej. 
+
+Tobbe: Behöver man skapa en egen SSLSocketFactory som implemnterar det gränssnittet eller 
+kan man skapa en socket direkt i till exempel server klassen?
+
