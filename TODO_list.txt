@@ -3,7 +3,7 @@ TODO-list
 * challelnge-response
 * rapport
 * client
-* log
+* log DONE?
 * create SSL sockets and SSL engine, ing�r i JSSE?
 intressant att inte en goverment agency skall kunna utf�ra "write"
 Skulle vi implemetera n�gon form av l�senord? Eller skulle det finnas med i
