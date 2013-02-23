@@ -49,6 +49,8 @@ public class Server {
 			SSLSession session = socket.getSession();
 			
 			//forces the client to authenticate itself. Men hur gör //man det?
+			//TODO server sends it's cert to client
+			//TODO SSLengine
 				socket.setNeedClientAuth(true);
 				
 				client = ss.accept();
@@ -56,7 +58,6 @@ public class Server {
 				fromClient = new BufferedReader(new InputStreamReader(
 						client.getInputStream()));
 				toClient = new DataOutputStream(client.getOutputStream());
-
 				
 				loginClient(fromClient, toClient);
 				
@@ -77,10 +78,11 @@ public class Server {
 					 */
 					
 				}
-
 				
-				
-				// Check username
+				//trying to get the name of the "client"
+					X509Certificate cert = (X509Certificate)session getPeerCertificateChain()[0];
+					String subject = cert.getSubjectDN().getName();
+					System.out.println (subject);
 
 			}
 		} catch (IOException e) {
