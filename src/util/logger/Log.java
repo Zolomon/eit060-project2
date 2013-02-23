@@ -13,19 +13,14 @@ public class Log {
 	public static int LVL_INFO = 2;
 	public static int LVL_DEBUG = 3;
 	public static int LVL_TRACE = 4;
-	
-	public static String[] lvlToString = new String[] {
-		"LVL_ERROR",
-		"LVL_WARNING",
-		"LVL_INFO",
-		"LVL_DEBUG",
-		"LVL_TRACE"
-	};
-	
+
+	public static String[] lvlToString = new String[] { "LVL_ERROR",
+			"LVL_WARNING", "LVL_INFO", "LVL_DEBUG", "LVL_TRACE" };
+
 	private ArrayList<LogEvent> events;
 	private OutputStream stream;
 
-	public Log (OutputStream stream) {
+	public Log(OutputStream stream) {
 		this.events = new ArrayList<LogEvent>();
 		this.stream = stream;
 	}
@@ -36,7 +31,8 @@ public class Log {
 			stream.write(event.toString().getBytes());
 		} catch (IOException e) {
 			e.printStackTrace();
-			updateLog(new LogEvent(LVL_ERROR, "EXCEPTION", "Error when writing to output stream"));
+			updateLog(new LogEvent(LVL_ERROR, "EXCEPTION",
+					"Error when writing to output stream"));
 		}
 	}
 

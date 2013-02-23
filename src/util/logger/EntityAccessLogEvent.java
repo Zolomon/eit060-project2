@@ -19,14 +19,14 @@ public class EntityAccessLogEvent extends LogEvent {
 										: "executed", record.getId()));
 
 	}
-	
-	public EntityAccessLogEvent(Entity entity, Record record,
-			int accessRight) {
+
+	public EntityAccessLogEvent(Entity entity, Record record, int accessRight) {
 		super(
 				Log.LVL_INFO,
 				"Entity Accessed Record",
 				String.format(
-						"%s #%d %s Record #%d", entity.getType(),
+						"%s #%d %s Record #%d",
+						entity.getType(),
 						entity.getId(),
 						accessRight == EntityWithAccessControl.READ ? "read"
 								: accessRight == EntityWithAccessControl.WRITE ? "wrote to"

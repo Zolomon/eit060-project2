@@ -189,7 +189,8 @@ public class Server {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e.toString()));
+			log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
+					.toString()));
 		}
 	}
 
@@ -258,12 +259,13 @@ public class Server {
 							doctor.getName()));
 		}
 
-		Record j = new Record(patient, doctor, nurse, patient.getData());
+		Record record = new Record(patient, doctor, nurse, patient.getData());
 
 		// log update in true case.
-		log.updateLog(new EntityAccessLogEvent(doctor, j, EntityWithAccessControl.EXECUTE));
+		log.updateLog(new EntityAccessLogEvent(doctor, record,
+				EntityWithAccessControl.EXECUTE));
 
-		return j;
+		return record;
 	}
 
 	public String readData(Record record, Entity entity)
@@ -273,25 +275,29 @@ public class Server {
 		} catch (AccessDeniedException e) {
 
 			// logs in false case
-			log.updateLog(new EntityAccessDeniedLogEvent(entity, record, EntityWithAccessControl.READ));
+			log.updateLog(new EntityAccessDeniedLogEvent(entity, record,
+					EntityWithAccessControl.READ));
 			e.printStackTrace();
 		}
 		// logs in true case
-		log.updateLog(new EntityAccessLogEvent(entity, record, EntityWithAccessControl.READ));
+		log.updateLog(new EntityAccessLogEvent(entity, record,
+				EntityWithAccessControl.READ));
 		return null;
 	}
 
-	public void writeData(Record record, Entity entity,
-			String data) throws AccessDeniedException {
+	public void writeData(Record record, Entity entity, String data)
+			throws AccessDeniedException {
 		try {
 			record.writeData(entity, data);
 		} catch (AccessDeniedException e) {
 			// logs in false case
-			log.updateLog(new EntityAccessDeniedLogEvent(entity, record, EntityWithAccessControl.READ));
+			log.updateLog(new EntityAccessDeniedLogEvent(entity, record,
+					EntityWithAccessControl.READ));
 			e.printStackTrace();
 		}
 		// logs in true case
-		log.updateLog(new EntityAccessLogEvent(entity, record, EntityWithAccessControl.READ));
+		log.updateLog(new EntityAccessLogEvent(entity, record,
+				EntityWithAccessControl.READ));
 	}
 
 	public void deleteJournal(Record record, Entity entity)
@@ -300,10 +306,12 @@ public class Server {
 			record.delete(entity);
 		} catch (AccessDeniedException e) {
 			// logs in false case
-			log.updateLog(new EntityAccessDeniedLogEvent(entity, record, EntityWithAccessControl.READ));
+			log.updateLog(new EntityAccessDeniedLogEvent(entity, record,
+					EntityWithAccessControl.READ));
 			e.printStackTrace();
 		}
 		// logs in true case
-		log.updateLog(new EntityAccessLogEvent(entity, record, EntityWithAccessControl.READ));
+		log.updateLog(new EntityAccessLogEvent(entity, record,
+				EntityWithAccessControl.READ));
 	}
 }

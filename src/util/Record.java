@@ -65,7 +65,6 @@ public class Record {
 			toDelete = true;
 			return true;
 		}
-
 		throw new AccessDeniedException("Not enough access to delete.");
 	}
 

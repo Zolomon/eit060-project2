@@ -33,10 +33,11 @@ public class LogEvent implements ILogEvent {
 	public int getId() {
 		return myId;
 	}
-	
+
 	@Override
 	public String toString() {
-		return String.format("[%s, %s, %s]\n", Log.lvlToString[level], type, msg);
+		return String.format("[%s, %s, %s]\n", Log.lvlToString[level], type,
+				msg);
 	}
 
 }
