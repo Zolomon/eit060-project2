@@ -2,12 +2,17 @@ package server;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.AccessDeniedException;
 import java.security.InvalidParameterException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +23,7 @@ import javax.net.ssl.*;
 import javax.security.cert.X509Certificate;
 
 import java.security.*;
+import java.security.cert.CertificateException;
 
 import util.*;
 import util.logger.EntityAccessDeniedLogEvent;
@@ -40,10 +46,6 @@ public class Server {
 	private static final String HOST = "127.0.0.1";
 	private static final int PORT = 55555;
 
-	// trying to initiate a SSLSocketfactory to the handshake
-	private SSLServerSocketFactory socketFac = (SSLServerSocketFactory) SSLServerSocketFactory
-			.getDefault();
-
 	public static void main(String[] args) {
 
 		divisions = new HashMap<Integer, Division>();
@@ -61,10 +63,10 @@ public class Server {
 		divisions.put(7, new Division("Socialstyrelsen"));
 
 		docs = new ArrayList<Doctor>();
-		docs.add(new Doctor("Fulgore d0_0", divisions.get(0)));
-		docs.add(new Doctor("Fulgore d0_1", divisions.get(0)));
+		docs.add(new Doctor("Doctor d0_0", divisions.get(0)));
+		docs.add(new Doctor("Doctor d0_1", divisions.get(0)));
 
-		docs.add(new Doctor("Riptor d1_0", divisions.get(1)));
+		docs.add(new Doctor("Doctor d1_0", divisions.get(1)));
 
 		nurses = new ArrayList<Nurse>();
 		nurses.add(new Nurse("Sabrewulf n0_0", divisions.get(0)));
@@ -85,7 +87,7 @@ public class Server {
 		records.add(createJournal(patients.get(0), docs.get(0), nurses.get(0)));
 		records.add(createJournal(patients.get(1), docs.get(1), nurses.get(1)));
 		records.add(createJournal(patients.get(2), docs.get(2), nurses.get(2)));
-
+		
 		Server s = new Server();
 		s.run();
 	}
@@ -124,33 +126,38 @@ public class Server {
 		commands.put("assign nurse", Pattern
 				.compile("assign (?<nurseid>\\d+) to (?<patientid>\\d+)"));
 
-		// Temporary tcp-connection
-		// TODO: FIXME: Make this an SSLServersocket instead...
-		SSLServerSocket ss;
+	
+		
+		//SSLServerSocket ss;
+		SSLSocket client;
+		BufferedReader fromClient;
+		DataOutputStream toClient;
+		String readLine = null;
 
 		try {
-			// creates server socket
-			ss = (SSLServerSocket)socketFac.createServerSocket(PORT);
+			System.setProperty("javax.net.ssl.keyStore", "certificates/serverKeystore");
+			System.setProperty("javax.net.ssl.keyStorePassword", "serverpassword");
+			System.setProperty("javax.net.ssl.trustStore", "certificates/CAtruststore");
+			System.setProperty("javax.net.ssl.trustStorePassword", "StorePass");
 			
+			SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+			// creates server socket
+			SSLServerSocket ss = (SSLServerSocket)factory.createServerSocket(PORT);
+			ss.setNeedClientAuth(true);
 
 			System.out.println("Running server ...");
-
-			SSLSocket client;
-			BufferedReader fromClient;
-			DataOutputStream toClient;
-			String readLine = null;
+			System.out.println("Server is listening on port" + PORT);
+			client = (SSLSocket)ss.accept();
+			
+			
+			SSLSession session = client.getSession();
+			X509Certificate cert = (X509Certificate)session.getPeerCertificateChain()[0];
+			String subject = cert.getSubjectDN().getName();
+			System.out.println (subject);
+			System.out.println("Client connected ...");
 
 			while (true) {
 
-				
-				
-				client = (SSLSocket)ss.accept();
-				ss.setNeedClientAuth(true);
-				SSLSession session = client.getSession();
-				X509Certificate cert = (X509Certificate)session.getPeerCertificateChain()[0];
-				String subject = cert.getSubjectDN().getName();
-				System.out.println (subject);
-				
 				System.out.println("Client connected ...");
 
 				fromClient = new BufferedReader(new InputStreamReader(
@@ -181,7 +188,6 @@ public class Server {
 				
 			}
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 			log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
 					.toString()));

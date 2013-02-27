@@ -33,45 +33,28 @@ public class Client {
 			
 			try{
 				
-				
-                //... borde vara filen certet?
-                char[] passphrase = "1234".toCharArray();
-                sslCont = SSLContext.getInstance("TLS");
-                
-                kmf = KeyManagerFactory.getInstance("SunX509");
-                ks = KeyStore.getInstance("JKS");
-                
-                //testkeys borde vara...
-                ks.load(new FileInputStream("testkeys"), passphrase);
-                
-                System.out.print("passing load");
-                
-                cFac = sslCont.getSocketFactory();
+				System.setProperty("javax.net.ssl.keyStore", "certificates/doctor0_0Keystore");
+				System.setProperty("javax.net.ssl.keyStorePassword", "doctor00password");
+				System.setProperty("javax.net.ssl.trustStore", "certificates/CAtruststore");
+				System.setProperty("javax.net.ssl.trustStorePassword", "StorePass");
                 
                 client = (SSLSocket)cFac.createSocket(HOST, PORT);
+                client.setUseClientMode(true);
                 
                 client.startHandshake();
                 
-                System.out.println("So far");
-                System.out.print(client);
+                
+                
+                System.out.println("So far, closing");
                 
                 
                 client.close();
 				
-			}catch (NoSuchAlgorithmException e){
-				System.out.println("1");
-				e.printStackTrace();
-			} catch (UnknownHostException e) {
+			}catch (UnknownHostException e) {
 				System.out.println("2");
 				e.printStackTrace();
 			} catch (IOException e) {
 				System.out.println("3");
-				e.printStackTrace();
-			} catch (KeyStoreException e) {
-				System.out.println("4");
-				e.printStackTrace();
-			} catch (CertificateException e) {
-				System.out.println("5");
 				e.printStackTrace();
 			}
 

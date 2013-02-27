@@ -1,4 +1,0 @@
-1 = createJournal, saves doctor in true case
-2 = readData
-3 = writeData
-4 = deleteJournal

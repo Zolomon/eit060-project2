@@ -38,10 +38,10 @@ public class TestEntities {
 		divisions.put(7, new Division("Socialstyrelsen"));
 
 		docs = new ArrayList<Doctor>();
-		docs.add(new Doctor("Fulgore d0_0", divisions.get(0)));
-		docs.add(new Doctor("Fulgore d0_1", divisions.get(0)));
+		docs.add(new Doctor("Doctor d0_0", divisions.get(0)));
+		docs.add(new Doctor("Doctor d0_1", divisions.get(0)));
 
-		docs.add(new Doctor("Riptor d1_0", divisions.get(1)));
+		docs.add(new Doctor("Doctor d1_0", divisions.get(1)));
 
 		nurses = new ArrayList<Nurse>();
 		nurses.add(new Nurse("Sabrewulf n0_0", divisions.get(0)));
