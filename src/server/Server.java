@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.*;
+import javax.security.cert.X509Certificate;
 
 import java.security.*;
 
@@ -35,6 +36,9 @@ public class Server {
 	private static Log log = new Log(System.out);
 
 	private static Entity currentEntityUser;
+	
+	private static final String HOST = "127.0.0.1";
+	private static final int PORT = 55555;
 
 	// trying to initiate a SSLSocketfactory to the handshake
 	private SSLServerSocketFactory socketFac = (SSLServerSocketFactory) SSLServerSocketFactory
@@ -122,37 +126,31 @@ public class Server {
 
 		// Temporary tcp-connection
 		// TODO: FIXME: Make this an SSLServersocket instead...
-		// SSLSocket ss;
-		ServerSocket ss;
+		SSLServerSocket ss;
 
 		try {
 			// creates server socket
-			// ss = socketFac.createServerSocket();
-			ss = new ServerSocket(6789);
+			ss = (SSLServerSocket)socketFac.createServerSocket(PORT);
+			
 
 			System.out.println("Running server ...");
 
-			Socket client;
+			SSLSocket client;
 			BufferedReader fromClient;
 			DataOutputStream toClient;
 			String readLine = null;
 
 			while (true) {
 
-				// listens on a connection
-				// do we need to bind it?
-				// SSLSocket socket =(SSLSocket)ss.accept();
-
-				// sets up the handshake
-				// SSLSession session = socket.getSession();
-
-				// forces the client to authenticate itself. Men hur gör //man
-				// det?
-				// TODO server sends it's cert to client
-				// TODO SSLengine
-				// socket.setNeedClientAuth(true);
-
-				client = ss.accept();
+				
+				
+				client = (SSLSocket)ss.accept();
+				ss.setNeedClientAuth(true);
+				SSLSession session = client.getSession();
+				X509Certificate cert = (X509Certificate)session.getPeerCertificateChain()[0];
+				String subject = cert.getSubjectDN().getName();
+				System.out.println (subject);
+				
 				System.out.println("Client connected ...");
 
 				fromClient = new BufferedReader(new InputStreamReader(
@@ -180,14 +178,10 @@ public class Server {
 				} while (readLine != null && !readLine.equals("quit"));
 
 				// Check username
-				// trying to get the name of the "client"
-				// X509Certificate cert = (X509Certificate)session
-				// getPeerCertificateChain()[0];
-				// String subject = cert.getSubjectDN().getName();
-				// System.out.println (subject);
-
+				
 			}
 		} catch (IOException e) {
+			
 			e.printStackTrace();
 			log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
 					.toString()));
