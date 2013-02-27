@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.nio.file.AccessDeniedException;
 import java.security.InvalidParameterException;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -42,9 +43,8 @@ public class Server {
 	private static Log log = new Log(System.out);
 
 	private static Entity currentEntityUser;
-	
-	private static final String HOST = "127.0.0.1";
-	private static final int PORT = 55555;
+
+	private static final int PORT = 55554;
 
 	public static void main(String[] args) {
 
@@ -63,7 +63,7 @@ public class Server {
 		divisions.put(7, new Division("Socialstyrelsen"));
 
 		docs = new ArrayList<Doctor>();
-		docs.add(new Doctor("Doctor d0_0", divisions.get(0)));
+		docs.add(new Doctor("doctor0_0", divisions.get(0)));
 		docs.add(new Doctor("Doctor d0_1", divisions.get(0)));
 
 		docs.add(new Doctor("Doctor d1_0", divisions.get(1)));
@@ -87,7 +87,15 @@ public class Server {
 		records.add(createJournal(patients.get(0), docs.get(0), nurses.get(0)));
 		records.add(createJournal(patients.get(1), docs.get(1), nurses.get(1)));
 		records.add(createJournal(patients.get(2), docs.get(2), nurses.get(2)));
-		
+
+		// System.setProperty("javax.net.ssl.keyStore",
+		// "certificates/serverKeystore");
+		// System.setProperty("javax.net.ssl.keyStorePassword",
+		// "serverpassword");
+		// System.setProperty("javax.net.ssl.trustStore",
+		// "certificates/CAtruststore");
+		// System.setProperty("javax.net.ssl.trustStorePassword", "StorePass");
+
 		Server s = new Server();
 		s.run();
 	}
@@ -126,34 +134,40 @@ public class Server {
 		commands.put("assign nurse", Pattern
 				.compile("assign (?<nurseid>\\d+) to (?<patientid>\\d+)"));
 
-	
-		
-		//SSLServerSocket ss;
 		SSLSocket client;
 		BufferedReader fromClient;
 		DataOutputStream toClient;
 		String readLine = null;
 
 		try {
-			System.setProperty("javax.net.ssl.keyStore", "certificates/serverKeystore");
-			System.setProperty("javax.net.ssl.keyStorePassword", "serverpassword");
-			System.setProperty("javax.net.ssl.trustStore", "certificates/CAtruststore");
-			System.setProperty("javax.net.ssl.trustStorePassword", "StorePass");
-			
-			SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-			// creates server socket
-			SSLServerSocket ss = (SSLServerSocket)factory.createServerSocket(PORT);
+
+			char[] passphrase = "StorePass".toCharArray();
+
+			SSLContext ctx = SSLContext.getInstance("TLS");
+			KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+			KeyStore ks = KeyStore.getInstance("JKS");
+
+			ks.load(new FileInputStream("c:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\CAtruststore"),
+					passphrase);
+
+			kmf.init(ks, passphrase);
+			ctx.init(kmf.getKeyManagers(), null, null);
+
+			SSLServerSocketFactory factory = ctx.getServerSocketFactory();
+
+			SSLServerSocket ss = (SSLServerSocket) factory
+					.createServerSocket(PORT);
 			ss.setNeedClientAuth(true);
 
 			System.out.println("Running server ...");
-			System.out.println("Server is listening on port" + PORT);
-			client = (SSLSocket)ss.accept();
-			
-			
+			System.out.println("Server is listening on port " + PORT);
+			client = (SSLSocket) ss.accept();
+
 			SSLSession session = client.getSession();
-			X509Certificate cert = (X509Certificate)session.getPeerCertificateChain()[0];
+			X509Certificate cert = (X509Certificate) session
+					.getPeerCertificateChain()[0];
 			String subject = cert.getSubjectDN().getName();
-			System.out.println (subject);
+			System.out.println(subject);
 			System.out.println("Client connected ...");
 
 			while (true) {
@@ -185,12 +199,28 @@ public class Server {
 				} while (readLine != null && !readLine.equals("quit"));
 
 				// Check username
-				
+
 			}
 		} catch (IOException e) {
+			System.out.println("Vad händer?!?!?!");
 			e.printStackTrace();
-			log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
-					.toString()));
+			// log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
+			// .toString()));
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CertificateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnrecoverableKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (KeyManagementException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
