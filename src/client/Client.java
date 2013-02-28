@@ -20,17 +20,16 @@ public class Client {
 	private static final int PORT = 5678;
 
 	public static void main(String[] args) {
-		System.setProperty("javax.net.ssl.trustStore", "C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\CA\\truststore");
-		
+		System.setProperty(
+				"javax.net.ssl.trustStore",
+				"C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\CA\\truststore");
+
 		SSLSocketFactory factory = null;
 		SSLContext ctx = null;
-		Socket s = null;
 		KeyManagerFactory kmf = null;
 		KeyStore ks = null;
 		TrustManagerFactory tmf = null;
-		BufferedReader fromServer;
-		DataOutputStream toServer;
-		BufferedReader buffReader;
+
 		try {
 			char[] passphrase = "password".toCharArray();
 
@@ -53,11 +52,32 @@ public class Client {
 					PORT);
 			client.setUseClientMode(true);
 			client.startHandshake();
-			
-			
-			
-				
-		
+
+			PrintWriter out = new PrintWriter(new BufferedWriter(
+					new OutputStreamWriter(client.getOutputStream())));
+
+			out.println("so far");
+			out.println();
+			out.flush();
+
+			/*
+			 * Make sure there were no surprises
+			 */
+			if (out.checkError())
+				System.out
+				.println("SSLSocketClient:  java.io.PrintWriter error");
+
+			/* read response */
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					client.getInputStream()));
+
+			String inputLine;
+			while ((inputLine = in.readLine()) != null)
+				System.out.println(inputLine);
+
+			in.close();
+			out.close();
+			client.close();
 
 		} catch (UnknownHostException e) {
 			System.out.println("2");

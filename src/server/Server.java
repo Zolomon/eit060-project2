@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.AccessDeniedException;
@@ -131,7 +132,6 @@ public class Server {
 		BufferedReader fromClient;
 		DataOutputStream toClient;
 		String readLine = null;
-		// ServerSocket ss;
 
 		try {
 			
@@ -176,8 +176,7 @@ public class Server {
 						client.getInputStream()));
 				toClient = new DataOutputStream(client.getOutputStream());
 				// TODO: Fix login, fetch real logged in entity
-				currentEntityUser = patients.get(0);
-
+				currentEntityUser = docs.get(0);	
 				toClient.writeBytes(String.format("Welcome %s! %s\n\n",
 						currentEntityUser.getName(), currentEntityUser
 								.getClass().getName()));
@@ -266,6 +265,7 @@ public class Server {
 
 	private void loginClient(BufferedReader fromClient,
 			DataOutputStream toClient) {
+		System.out.println("Enter your command: ");
 
 	}
 
