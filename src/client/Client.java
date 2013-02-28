@@ -18,12 +18,12 @@ import javax.net.ssl.TrustManagerFactory;
 public class Client {
 
  
-	private static final int PORT = 55554;
+	private static final int PORT = 5678;
 	
 	public static void main(String[] args) {
 		SSLSocketFactory factory = null;
 		SSLContext ctx = null;
-		SSLSocket client = null;
+		Socket s = null;
 		KeyManagerFactory kmf = null;
         KeyStore ks = null;
         
@@ -36,27 +36,29 @@ public class Client {
 				//System.setProperty("javax.net.ssl.trustStore", "certificates/CAtruststore");
 				//System.setProperty("javax.net.ssl.trustStorePassword", "StorePass");
                 
-					
-				java.net.InetAddress localMachine =
-						java.net.InetAddress.getLocalHost();
 				
-	                char[] passphrase = "doctor00password".toCharArray();
+	                //char[] passphrase = "doctor00password".toCharArray();
 
-	                ctx = SSLContext.getInstance("TLS");
-	                kmf = KeyManagerFactory.getInstance("SunX509");
-	                ks = KeyStore.getInstance("JKS");
+	                //ctx = SSLContext.getInstance("TLS");
+	               // kmf = KeyManagerFactory.getInstance("SunX509");
+	                //ks = KeyStore.getInstance("JKS");
 
-	                ks.load(new FileInputStream("c:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\doctor0_0Keystore"), passphrase);
+	                //ks.load(new FileInputStream("c:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\doctor0_0Keystore"), passphrase);
 
-	                kmf.init(ks, passphrase);
-	                ctx.init(kmf.getKeyManagers(), null, null);
+	                //kmf.init(ks, passphrase);
+	                //ctx.init(kmf.getKeyManagers(), null, null);
 
-	                factory = ctx.getSocketFactory();
+	                //factory = ctx.getSocketFactory();
 				
-                client = (SSLSocket)factory.createSocket(localMachine, PORT);
-                client.setUseClientMode(true);
+                //client = (SSLSocket)factory.createSocket(localMachine, PORT);
+                //client.setUseClientMode(true);
+				
+				s = new Socket("localhost", PORT);
                 
-                client.startHandshake();
+				OutputStream out = s.getOutputStream();
+			    InputStream in = s.getInputStream();
+				
+                //client.startHandshake();
    
 				
 			}catch (UnknownHostException e) {
@@ -64,21 +66,6 @@ public class Client {
 				e.printStackTrace();
 			} catch (IOException e) {
 				System.out.println("3");
-				e.printStackTrace();
-			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (KeyStoreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CertificateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (UnrecoverableKeyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (KeyManagementException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 

@@ -44,7 +44,7 @@ public class Server {
 
 	private static Entity currentEntityUser;
 
-	private static final int PORT = 55554;
+	private static final int PORT = 5678;
 
 	public static void main(String[] args) {
 
@@ -134,93 +134,85 @@ public class Server {
 		commands.put("assign nurse", Pattern
 				.compile("assign (?<nurseid>\\d+) to (?<patientid>\\d+)"));
 
-		SSLSocket client;
+		Socket client;
 		BufferedReader fromClient;
 		DataOutputStream toClient;
 		String readLine = null;
+		ServerSocket ss;
 
 		try {
 
-			char[] passphrase = "StorePass".toCharArray();
+			//char[] passphrase = "StorePass".toCharArray();
 
-			SSLContext ctx = SSLContext.getInstance("TLS");
-			KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-			KeyStore ks = KeyStore.getInstance("JKS");
+			//SSLContext ctx = SSLContext.getInstance("TLS");
+			//KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+			//KeyStore ks = KeyStore.getInstance("JKS");
 
-			ks.load(new FileInputStream("c:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\CAtruststore"),
-					passphrase);
+			//ks.load(new FileInputStream("c:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\CAtruststore"),
+			//		passphrase);
 
-			kmf.init(ks, passphrase);
-			ctx.init(kmf.getKeyManagers(), null, null);
+			//kmf.init(ks, passphrase);
+			//ctx.init(kmf.getKeyManagers(), null, null);
 
-			SSLServerSocketFactory factory = ctx.getServerSocketFactory();
+			//SSLServerSocketFactory factory = ctx.getServerSocketFactory();
 
-			SSLServerSocket ss = (SSLServerSocket) factory
-					.createServerSocket(PORT);
-			ss.setNeedClientAuth(true);
-
+			//SSLServerSocket ss = (SSLServerSocket) factory
+			//		.createServerSocket(PORT);
+			//ss.setNeedClientAuth(true);
+			
+			
+			
 			System.out.println("Running server ...");
-			System.out.println("Server is listening on port " + PORT);
-			client = (SSLSocket) ss.accept();
+			
+			
 
-			SSLSession session = client.getSession();
-			X509Certificate cert = (X509Certificate) session
-					.getPeerCertificateChain()[0];
-			String subject = cert.getSubjectDN().getName();
-			System.out.println(subject);
+			//SSLSession session = client.getSession();
+			//X509Certificate cert = (X509Certificate) session
+			//		.getPeerCertificateChain()[0];
+			//String subject = cert.getSubjectDN().getName();
+			//System.out.println(subject);
+			//System.out.println("Client connected ...");
+			
+			ss = new ServerSocket(PORT);
+			System.out.println("Server is listening on port " + PORT);
+			client = (Socket)ss.accept();
 			System.out.println("Client connected ...");
 
 			while (true) {
+				
+				
 
-				System.out.println("Client connected ...");
-
-				fromClient = new BufferedReader(new InputStreamReader(
-						client.getInputStream()));
-				toClient = new DataOutputStream(client.getOutputStream());
-				// TODO: Fix login, fetch real logged in entity
-				currentEntityUser = patients.get(0);
-
-				toClient.writeBytes(String.format("Welcome %s! %s\n\n",
-						currentEntityUser.getName(), currentEntityUser
-								.getClass().getName()));
-
-				loginClient(fromClient, toClient);
-
-				do {
-					toClient.writeBytes("Enter your command: ");
-					readLine = fromClient.readLine();
-
-					for (Entry<String, Pattern> e : commands.entrySet()) {
-						if (e.getValue().matcher(readLine).matches()) {
-							toClient.writeChars(handleCommand(
-									currentEntityUser, e.getKey(), e.getValue()));
-						}
-					}
-				} while (readLine != null && !readLine.equals("quit"));
+//				fromClient = new BufferedReader(new InputStreamReader(
+//						client.getInputStream()));
+//				toClient = new DataOutputStream(client.getOutputStream());
+//				// TODO: Fix login, fetch real logged in entity
+//				currentEntityUser = patients.get(0);
+//
+//				toClient.writeBytes(String.format("Welcome %s! %s\n\n",
+//						currentEntityUser.getName(), currentEntityUser
+//								.getClass().getName()));
+//
+//				loginClient(fromClient, toClient);
+//
+//				do {
+//					toClient.writeBytes("Enter your command: ");
+//					readLine = fromClient.readLine();
+//
+//					for (Entry<String, Pattern> e : commands.entrySet()) {
+//						if (e.getValue().matcher(readLine).matches()) {
+//							toClient.writeChars(handleCommand(
+//									currentEntityUser, e.getKey(), e.getValue()));
+//						}
+//					}
+//				} while (readLine != null && !readLine.equals("quit"));
 
 				// Check username
 
 			}
 		} catch (IOException e) {
-			System.out.println("Vad händer?!?!?!");
 			e.printStackTrace();
-			// log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
-			// .toString()));
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (KeyStoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CertificateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnrecoverableKeyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (KeyManagementException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			 log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
+			 .toString()));
 		}
 	}
 
