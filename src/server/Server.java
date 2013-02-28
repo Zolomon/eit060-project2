@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.*;
@@ -170,10 +171,8 @@ public class Server {
 			System.out.println(subject);
 
 			System.out.println("Client connected ...");
+			
 			while (true) {
-
-				fromClient = new BufferedReader(new InputStreamReader(
-						client.getInputStream()));
 				
 				toClient = new DataOutputStream(client.getOutputStream());
 				// TODO: Fix login, fetch real logged in entity
@@ -181,28 +180,40 @@ public class Server {
 				toClient.writeBytes(String.format("Welcome %s! %s\n\n",
 						currentEntityUser.getName(), currentEntityUser
 								.getClass().getName()));
-
-				loginClient(fromClient, toClient);
-
-				do {
-					toClient.writeBytes("Enter your command: ");
-					readLine = fromClient.readLine();
-					
-					if(readLine.equals("exit)")){
-						System.out.print("exit");
-					}
-
-					for (Entry<String, Pattern> e : commands.entrySet()) {
-						if (e.getValue().matcher(readLine).matches()) {
-							toClient.writeChars(handleCommand(
-									currentEntityUser, e.getKey(), e.getValue()));
-						}
-					}
-				} while (readLine != null && !readLine.equals("quit"));
+				
+				toClient.flush();
+				
+				fromClient = new BufferedReader(new InputStreamReader(
+						client.getInputStream()));
+				Scanner sc = new Scanner(client.getInputStream());
+				System.out.println(sc.next());
+				readLine = fromClient.readLine();
+				System.out.print(readLine);
 				
 				
-				// Check username
+				//loginClient(fromClient, toClient);
+				
+				
 
+//				do {
+//					toClient.writeBytes("Enter your command: ");
+//					readLine = fromClient.readLine();
+//					
+//					if(readLine.equals("exit)")){
+//						System.out.print("exit");
+//					}
+//
+//					for (Entry<String, Pattern> e : commands.entrySet()) {
+//						if (e.getValue().matcher(readLine).matches()) {
+//							toClient.writeChars(handleCommand(
+//									currentEntityUser, e.getKey(), e.getValue()));
+//						}
+//					}
+//				} while (readLine != null && !readLine.equals("quit"));
+//				
+//				
+//				// Check username
+//
 			}
 
 		} catch (IOException e) {

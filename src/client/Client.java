@@ -59,30 +59,22 @@ public class Client {
 					PORT);
 			client.setUseClientMode(true);
 			client.startHandshake();
-			BufferedReader in;
-			PrintWriter out;
+			BufferedReader fromServer;
+			DataOutputStream  toServer;
 			
 		while(true){
-			out = new PrintWriter(new BufferedWriter(
-					new OutputStreamWriter(client.getOutputStream())));
-			out.println("so far");
-			out.println();
-			out.flush();
-
-			/*
-			 * Make sure there were no surprises
-			 */
-			if (out.checkError())
-				System.out
-				.println("SSLSocketClient:  java.io.PrintWriter error");
-
+			
 			/* read response */
-			in = new BufferedReader(new InputStreamReader(
+			fromServer = new BufferedReader(new InputStreamReader(
 					client.getInputStream()));
-
-			String inputLine;
-			while ((inputLine = in.readLine()) != null)
+			String inputLine = fromServer.readLine();
 			System.out.println(inputLine);
+			
+			toServer = new DataOutputStream(client.getOutputStream());
+			System.out.println("Enter your command: ");
+			String outGoingMess = sc.next();
+			toServer.writeBytes(outGoingMess);
+			toServer.flush();
 			
 			//in.close();
 			//out.close();
