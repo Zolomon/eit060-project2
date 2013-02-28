@@ -44,11 +44,11 @@ public class Client {
 			kmf = KeyManagerFactory.getInstance("SunX509");
 			ks = KeyStore.getInstance("JKS");
 			tmf = TrustManagerFactory.getInstance("SunX509");
-
+	
 			ks.load(new FileInputStream(
 					"C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\"+id+"\\"+id+".jks"),
 					passphrase);
-
+			
 			kmf.init(ks, passphrase);
 			tmf.init(ks);
 			ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
@@ -76,9 +76,6 @@ public class Client {
 			toServer.writeBytes(outGoingMess);
 			toServer.flush();
 			
-			//in.close();
-			//out.close();
-			//client.close();
 		}
 		} catch (UnknownHostException e) {
 			System.out.println("2");
@@ -101,7 +98,7 @@ public class Client {
 		} catch (KeyManagementException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
 
 	}
+}
 }

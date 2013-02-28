@@ -185,8 +185,6 @@ public class Server {
 				
 				fromClient = new BufferedReader(new InputStreamReader(
 						client.getInputStream()));
-				Scanner sc = new Scanner(client.getInputStream());
-				System.out.println(sc.next());
 				readLine = fromClient.readLine();
 				System.out.print(readLine);
 				
