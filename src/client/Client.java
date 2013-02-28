@@ -2,6 +2,7 @@ package client;
 
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.Scanner;
 import java.io.*;
 import java.net.*;
 
@@ -19,6 +20,7 @@ public class Client {
 
 	private static final int PORT = 5678;
 
+
 	public static void main(String[] args) {
 		System.setProperty(
 				"javax.net.ssl.trustStore",
@@ -29,9 +31,14 @@ public class Client {
 		KeyManagerFactory kmf = null;
 		KeyStore ks = null;
 		TrustManagerFactory tmf = null;
-
+		
+		Scanner sc = new Scanner(System.in);;
+		System.out.print("Namn: ");
+		String id = sc.next();
+		System.out.print("Password: ");
+		String pass = sc.next();
 		try {
-			char[] passphrase = "password".toCharArray();
+			char[] passphrase = pass.toCharArray();
 
 			ctx = SSLContext.getInstance("TLS");
 			kmf = KeyManagerFactory.getInstance("SunX509");
@@ -39,7 +46,7 @@ public class Client {
 			tmf = TrustManagerFactory.getInstance("SunX509");
 
 			ks.load(new FileInputStream(
-					"c:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\doctor00\\doctor00.jks"),
+					"C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\"+id+"\\"+id+".jks"),
 					passphrase);
 
 			kmf.init(ks, passphrase);
