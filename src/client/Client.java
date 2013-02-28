@@ -17,59 +17,70 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class Client {
 
- 
 	private static final int PORT = 5678;
-	
+
 	public static void main(String[] args) {
+		System.setProperty("javax.net.ssl.trustStore", "C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\CA\\truststore");
+		
 		SSLSocketFactory factory = null;
 		SSLContext ctx = null;
 		Socket s = null;
 		KeyManagerFactory kmf = null;
-        KeyStore ks = null;
-        
-		while (true) {
+		KeyStore ks = null;
+		TrustManagerFactory tmf = null;
+		BufferedReader fromServer;
+		DataOutputStream toServer;
+		BufferedReader buffReader;
+		try {
+			char[] passphrase = "password".toCharArray();
+
+			ctx = SSLContext.getInstance("TLS");
+			kmf = KeyManagerFactory.getInstance("SunX509");
+			ks = KeyStore.getInstance("JKS");
+			tmf = TrustManagerFactory.getInstance("SunX509");
+
+			ks.load(new FileInputStream(
+					"c:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\doctor00\\doctor00.jks"),
+					passphrase);
+
+			kmf.init(ks, passphrase);
+			tmf.init(ks);
+			ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+			factory = ctx.getSocketFactory();
+
+			SSLSocket client = (SSLSocket) factory.createSocket("localhost",
+					PORT);
+			client.setUseClientMode(true);
+			client.startHandshake();
 			
-			try{
-				
-				//System.setProperty("javax.net.ssl.keyStore", "certificates/doctor0_0Keystore");
-				//System.setProperty("javax.net.ssl.keyStorePassword", "doctor00password");
-				//System.setProperty("javax.net.ssl.trustStore", "certificates/CAtruststore");
-				//System.setProperty("javax.net.ssl.trustStorePassword", "StorePass");
-                
-				
-	                //char[] passphrase = "doctor00password".toCharArray();
-
-	                //ctx = SSLContext.getInstance("TLS");
-	               // kmf = KeyManagerFactory.getInstance("SunX509");
-	                //ks = KeyStore.getInstance("JKS");
-
-	                //ks.load(new FileInputStream("c:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\doctor0_0Keystore"), passphrase);
-
-	                //kmf.init(ks, passphrase);
-	                //ctx.init(kmf.getKeyManagers(), null, null);
-
-	                //factory = ctx.getSocketFactory();
-				
-                //client = (SSLSocket)factory.createSocket(localMachine, PORT);
-                //client.setUseClientMode(true);
-				
-				s = new Socket("localhost", PORT);
-                
-				OutputStream out = s.getOutputStream();
-			    InputStream in = s.getInputStream();
-				
-                //client.startHandshake();
-   
-				
-			}catch (UnknownHostException e) {
-				System.out.println("2");
-				e.printStackTrace();
-			} catch (IOException e) {
-				System.out.println("3");
-				e.printStackTrace();
-			}
-
 			
+			
+				
+		
+
+		} catch (UnknownHostException e) {
+			System.out.println("2");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("3");
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CertificateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnrecoverableKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (KeyManagementException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
 	}
 }

@@ -47,7 +47,8 @@ public class Server {
 	private static final int PORT = 5678;
 
 	public static void main(String[] args) {
-
+		System.setProperty("javax.net.ssl.trustStore", "C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\CA\\truststore");
+		
 		divisions = new HashMap<Integer, Division>();
 
 		// http://en.wikipedia.org/wiki/Uppsala_University_Hospital#Divisions
@@ -63,7 +64,7 @@ public class Server {
 		divisions.put(7, new Division("Socialstyrelsen"));
 
 		docs = new ArrayList<Doctor>();
-		docs.add(new Doctor("doctor0_0", divisions.get(0)));
+		docs.add(new Doctor("doctor00", divisions.get(0)));
 		docs.add(new Doctor("Doctor d0_1", divisions.get(0)));
 
 		docs.add(new Doctor("Doctor d1_0", divisions.get(1)));
@@ -87,14 +88,6 @@ public class Server {
 		records.add(createJournal(patients.get(0), docs.get(0), nurses.get(0)));
 		records.add(createJournal(patients.get(1), docs.get(1), nurses.get(1)));
 		records.add(createJournal(patients.get(2), docs.get(2), nurses.get(2)));
-
-		// System.setProperty("javax.net.ssl.keyStore",
-		// "certificates/serverKeystore");
-		// System.setProperty("javax.net.ssl.keyStorePassword",
-		// "serverpassword");
-		// System.setProperty("javax.net.ssl.trustStore",
-		// "certificates/CAtruststore");
-		// System.setProperty("javax.net.ssl.trustStorePassword", "StorePass");
 
 		Server s = new Server();
 		s.run();
@@ -134,85 +127,99 @@ public class Server {
 		commands.put("assign nurse", Pattern
 				.compile("assign (?<nurseid>\\d+) to (?<patientid>\\d+)"));
 
-		Socket client;
+		SSLSocket client;
 		BufferedReader fromClient;
 		DataOutputStream toClient;
 		String readLine = null;
-		ServerSocket ss;
+		// ServerSocket ss;
 
 		try {
-
-			//char[] passphrase = "StorePass".toCharArray();
-
-			//SSLContext ctx = SSLContext.getInstance("TLS");
-			//KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-			//KeyStore ks = KeyStore.getInstance("JKS");
-
-			//ks.load(new FileInputStream("c:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\CAtruststore"),
-			//		passphrase);
-
-			//kmf.init(ks, passphrase);
-			//ctx.init(kmf.getKeyManagers(), null, null);
-
-			//SSLServerSocketFactory factory = ctx.getServerSocketFactory();
-
-			//SSLServerSocket ss = (SSLServerSocket) factory
-			//		.createServerSocket(PORT);
-			//ss.setNeedClientAuth(true);
 			
-			
-			
+
+			char[] passphrase = "password".toCharArray();
+
+			SSLContext ctx = SSLContext.getInstance("TLS");
+			KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+			KeyStore ks = KeyStore.getInstance("JKS");
+			TrustManagerFactory tmf = TrustManagerFactory
+					.getInstance("SunX509");
+
+			ks.load(new FileInputStream(
+					"C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\server\\server.jks"),
+					passphrase);
+
+			kmf.init(ks, passphrase);
+			tmf.init(ks);
+			ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+			SSLServerSocketFactory factory = ctx.getServerSocketFactory();
+
+			SSLServerSocket ss = (SSLServerSocket) factory
+					.createServerSocket(PORT);
+			ss.setNeedClientAuth(true);
 			System.out.println("Running server ...");
-			
-			
 
-			//SSLSession session = client.getSession();
-			//X509Certificate cert = (X509Certificate) session
-			//		.getPeerCertificateChain()[0];
-			//String subject = cert.getSubjectDN().getName();
-			//System.out.println(subject);
-			//System.out.println("Client connected ...");
-			
-			ss = new ServerSocket(PORT);
 			System.out.println("Server is listening on port " + PORT);
-			client = (Socket)ss.accept();
+
+			client = (SSLSocket) ss.accept();
+			System.out.println(client);
+			SSLSession session = client.getSession();
+			X509Certificate cert = (X509Certificate) session
+					.getPeerCertificateChain()[0];
+			String subject = cert.getSubjectDN().getName();
+			System.out.println(subject);
+
 			System.out.println("Client connected ...");
-
 			while (true) {
-				
-				
 
-//				fromClient = new BufferedReader(new InputStreamReader(
-//						client.getInputStream()));
-//				toClient = new DataOutputStream(client.getOutputStream());
-//				// TODO: Fix login, fetch real logged in entity
-//				currentEntityUser = patients.get(0);
-//
-//				toClient.writeBytes(String.format("Welcome %s! %s\n\n",
-//						currentEntityUser.getName(), currentEntityUser
-//								.getClass().getName()));
-//
-//				loginClient(fromClient, toClient);
-//
-//				do {
-//					toClient.writeBytes("Enter your command: ");
-//					readLine = fromClient.readLine();
-//
-//					for (Entry<String, Pattern> e : commands.entrySet()) {
-//						if (e.getValue().matcher(readLine).matches()) {
-//							toClient.writeChars(handleCommand(
-//									currentEntityUser, e.getKey(), e.getValue()));
-//						}
-//					}
-//				} while (readLine != null && !readLine.equals("quit"));
+				fromClient = new BufferedReader(new InputStreamReader(
+						client.getInputStream()));
+				toClient = new DataOutputStream(client.getOutputStream());
+				// TODO: Fix login, fetch real logged in entity
+				currentEntityUser = patients.get(0);
+
+				toClient.writeBytes(String.format("Welcome %s! %s\n\n",
+						currentEntityUser.getName(), currentEntityUser
+								.getClass().getName()));
+
+				loginClient(fromClient, toClient);
+
+				do {
+					toClient.writeBytes("Enter your command: ");
+					readLine = fromClient.readLine();
+
+					for (Entry<String, Pattern> e : commands.entrySet()) {
+						if (e.getValue().matcher(readLine).matches()) {
+							toClient.writeChars(handleCommand(
+									currentEntityUser, e.getKey(), e.getValue()));
+						}
+					}
+				} while (readLine != null && !readLine.equals("quit"));
 
 				// Check username
 
 			}
+
 		} catch (IOException e) {
+			System.out.println("Class Server died: " + e.getMessage());
 			e.printStackTrace();
-			 log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
-			 .toString()));
+			log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
+					.toString()));
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CertificateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (KeyManagementException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnrecoverableKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
