@@ -52,10 +52,12 @@ public class Client {
 					PORT);
 			client.setUseClientMode(true);
 			client.startHandshake();
-
-			PrintWriter out = new PrintWriter(new BufferedWriter(
+			BufferedReader in;
+			PrintWriter out;
+			
+		while(true){
+			out = new PrintWriter(new BufferedWriter(
 					new OutputStreamWriter(client.getOutputStream())));
-
 			out.println("so far");
 			out.println();
 			out.flush();
@@ -68,17 +70,17 @@ public class Client {
 				.println("SSLSocketClient:  java.io.PrintWriter error");
 
 			/* read response */
-			BufferedReader in = new BufferedReader(new InputStreamReader(
+			in = new BufferedReader(new InputStreamReader(
 					client.getInputStream()));
 
 			String inputLine;
 			while ((inputLine = in.readLine()) != null)
-				System.out.println(inputLine);
-
-			in.close();
-			out.close();
-			client.close();
-
+			System.out.println(inputLine);
+			
+			//in.close();
+			//out.close();
+			//client.close();
+		}
 		} catch (UnknownHostException e) {
 			System.out.println("2");
 			e.printStackTrace();

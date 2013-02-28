@@ -174,6 +174,7 @@ public class Server {
 
 				fromClient = new BufferedReader(new InputStreamReader(
 						client.getInputStream()));
+				
 				toClient = new DataOutputStream(client.getOutputStream());
 				// TODO: Fix login, fetch real logged in entity
 				currentEntityUser = docs.get(0);	
@@ -186,6 +187,10 @@ public class Server {
 				do {
 					toClient.writeBytes("Enter your command: ");
 					readLine = fromClient.readLine();
+					
+					if(readLine.equals("exit)")){
+						System.out.print("exit");
+					}
 
 					for (Entry<String, Pattern> e : commands.entrySet()) {
 						if (e.getValue().matcher(readLine).matches()) {
@@ -194,7 +199,8 @@ public class Server {
 						}
 					}
 				} while (readLine != null && !readLine.equals("quit"));
-
+				
+				
 				// Check username
 
 			}
@@ -265,7 +271,6 @@ public class Server {
 
 	private void loginClient(BufferedReader fromClient,
 			DataOutputStream toClient) {
-		System.out.println("Enter your command: ");
 
 	}
 
