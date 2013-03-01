@@ -1,5 +1,6 @@
 package client;
 
+
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Scanner;
@@ -15,6 +16,8 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
+
+
 
 public class Client {
 
@@ -62,21 +65,34 @@ public class Client {
 			BufferedReader fromServer;
 			DataOutputStream  toServer;
 			
-		while(true){
 			
-			/* read response */
-			fromServer = new BufferedReader(new InputStreamReader(
-					client.getInputStream()));
-			String inputLine = fromServer.readLine();
-			System.out.println(inputLine);
-			
+			String mess = "Go to client console\n";
+			Scanner sc1 = new Scanner(System.in);
 			toServer = new DataOutputStream(client.getOutputStream());
-			System.out.println("Enter your command: ");
-			String outGoingMess = sc.next();
-			toServer.writeBytes(outGoingMess);
-			toServer.flush();
+			while(!mess.equals("quit")){
+				toServer.writeBytes(mess);
+				toServer.flush();
+				System.out.println("Do you have something to say?\n");
+				mess = sc1.next()+"\n";
+			}
+				
+//		while(true){
+//			
+//			toServer = new DataOutputStream(client.getOutputStream());
+//			String outGoingMess = id;
+//			toServer.writeBytes(outGoingMess);
+//			toServer.flush();
+//			
+//			/* read response */
+//			
+//			fromServer = new BufferedReader(new InputStreamReader(
+//					client.getInputStream()));
+//			String inputLine = fromServer.readLine();
+//			System.out.println(inputLine);
 			
-		}
+			
+			
+		
 		} catch (UnknownHostException e) {
 			System.out.println("2");
 			e.printStackTrace();

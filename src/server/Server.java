@@ -171,22 +171,34 @@ public class Server {
 			System.out.println(subject);
 
 			System.out.println("Client connected ...");
-			
-			while (true) {
-				
-				toClient = new DataOutputStream(client.getOutputStream());
-				// TODO: Fix login, fetch real logged in entity
-				currentEntityUser = docs.get(0);	
-				toClient.writeBytes(String.format("Welcome %s! %s\n\n",
-						currentEntityUser.getName(), currentEntityUser
-								.getClass().getName()));
-				
-				toClient.flush();
+		
+			//while (true) {
 				
 				fromClient = new BufferedReader(new InputStreamReader(
 						client.getInputStream()));
-				readLine = fromClient.readLine();
-				System.out.print(readLine);
+				
+				String line = null;
+				while(((line = fromClient.readLine()) != null)){
+					System.out.println(line);
+				}
+				fromClient.close();
+				client.close();
+//				toClient = new DataOutputStream(client.getOutputStream());
+//		
+//					currentEntityUser = docs.get(0);	
+//					toClient.writeBytes(String.format("Welcome %s! %s\n\n",
+//							currentEntityUser.getName(), currentEntityUser
+//									.getClass().getName()));
+//					toClient.flush();
+					
+				// TODO: Fix login, fetch real logged in entity
+				
+				
+				fromClient = new BufferedReader(new InputStreamReader(
+						client.getInputStream()));
+				
+//				readLine = fromClient.readLine();
+//				System.out.print(readLine);
 				
 				
 				//loginClient(fromClient, toClient);
@@ -195,6 +207,7 @@ public class Server {
 
 //				do {
 //					toClient.writeBytes("Enter your command: ");
+//					toClient.flush();
 //					readLine = fromClient.readLine();
 //					
 //					if(readLine.equals("exit)")){
@@ -212,7 +225,7 @@ public class Server {
 //				
 //				// Check username
 //
-			}
+//			}
 
 		} catch (IOException e) {
 			System.out.println("Class Server died: " + e.getMessage());
