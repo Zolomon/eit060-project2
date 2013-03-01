@@ -60,39 +60,27 @@ public class Client {
 
 			SSLSocket client = (SSLSocket) factory.createSocket("localhost",
 					PORT);
+			String[] suit = client. getSupportedCipherSuites();
+			int i = 0;
+			while(i < suit.length){
+				System.out.print(suit[i]+"\n");
+				i++;
+			}
 			client.setUseClientMode(true);
 			client.startHandshake();
+			System.out.println(client);
 			BufferedReader fromServer;
 			DataOutputStream  toServer;
-			
-			
-			String mess = "Go to client console\n";
-			Scanner sc1 = new Scanner(System.in);
 			toServer = new DataOutputStream(client.getOutputStream());
-			while(!mess.equals("quit")){
-				toServer.writeBytes(mess);
-				toServer.flush();
-				System.out.println("Do you have something to say?\n");
-				mess = sc1.next()+"\n";
+			fromServer = new BufferedReader(new InputStreamReader(
+					client.getInputStream()));
+			while(true){
+			String inputLine = fromServer.readLine();
+			System.out.println(inputLine);
 			}
-				
-//		while(true){
-//			
-//			toServer = new DataOutputStream(client.getOutputStream());
-//			String outGoingMess = id;
-//			toServer.writeBytes(outGoingMess);
-//			toServer.flush();
-//			
-//			/* read response */
-//			
-//			fromServer = new BufferedReader(new InputStreamReader(
-//					client.getInputStream()));
-//			String inputLine = fromServer.readLine();
-//			System.out.println(inputLine);
 			
+
 			
-			
-		
 		} catch (UnknownHostException e) {
 			System.out.println("2");
 			e.printStackTrace();

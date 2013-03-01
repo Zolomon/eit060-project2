@@ -157,13 +157,20 @@ public class Server {
 
 			SSLServerSocket ss = (SSLServerSocket) factory
 					.createServerSocket(PORT);
+			String[] suit = ss. getSupportedCipherSuites();
+			int i = 0;
+			while(i < suit.length){
+				System.out.print(suit[i]+"\n");
+				i++;
+			}
+			
 			ss.setNeedClientAuth(true);
 			System.out.println("Running server ...");
-
+			System.out.println(ss);
 			System.out.println("Server is listening on port " + PORT);
 
 			client = (SSLSocket) ss.accept();
-			System.out.println(client);
+			
 			SSLSession session = client.getSession();
 			X509Certificate cert = (X509Certificate) session
 					.getPeerCertificateChain()[0];
@@ -171,61 +178,55 @@ public class Server {
 			System.out.println(subject);
 
 			System.out.println("Client connected ...");
+			System.out.println(client);
+			while (true) {
+				
+				fromClient = new BufferedReader(new InputStreamReader(
+						client.getInputStream()));
+				toClient = new DataOutputStream(client.getOutputStream());
+				
+//				String line = null;
+//				String outputLine = null;
+//				while(((line = fromClient.readLine()) != null)){
+//					System.out.println(line);
+//					outputLine = "Hello, you. Please enter your command: ";
+//					toClient.writeBytes(outputLine);
+//					toClient.flush();
+//
+//				}
+//				fromClient.close();
+//				client.close();
+				
 		
-			//while (true) {
-				
-				fromClient = new BufferedReader(new InputStreamReader(
-						client.getInputStream()));
-				
-				String line = null;
-				while(((line = fromClient.readLine()) != null)){
-					System.out.println(line);
-				}
-				fromClient.close();
-				client.close();
-//				toClient = new DataOutputStream(client.getOutputStream());
-//		
-//					currentEntityUser = docs.get(0);	
-//					toClient.writeBytes(String.format("Welcome %s! %s\n\n",
-//							currentEntityUser.getName(), currentEntityUser
-//									.getClass().getName()));
-//					toClient.flush();
-					
+					currentEntityUser = docs.get(0);	
+					toClient.writeBytes(String.format("Welcome %s! %s\n\n",
+							currentEntityUser.getName(), currentEntityUser
+									.getClass().getName())+"\n");
+					toClient.flush();
 				// TODO: Fix login, fetch real logged in entity
-				
-				
-				fromClient = new BufferedReader(new InputStreamReader(
-						client.getInputStream()));
-				
-//				readLine = fromClient.readLine();
-//				System.out.print(readLine);
-				
-				
+	
 				//loginClient(fromClient, toClient);
-				
-				
+				do {
+					toClient.writeBytes("Enter your command: ");
+					toClient.flush();
+					readLine = fromClient.readLine();
+					
+					if(readLine.equals("exit)")){
+						System.out.print("exit");
+					}
 
-//				do {
-//					toClient.writeBytes("Enter your command: ");
-//					toClient.flush();
-//					readLine = fromClient.readLine();
-//					
-//					if(readLine.equals("exit)")){
-//						System.out.print("exit");
-//					}
-//
-//					for (Entry<String, Pattern> e : commands.entrySet()) {
-//						if (e.getValue().matcher(readLine).matches()) {
-//							toClient.writeChars(handleCommand(
-//									currentEntityUser, e.getKey(), e.getValue()));
-//						}
-//					}
-//				} while (readLine != null && !readLine.equals("quit"));
-//				
-//				
-//				// Check username
-//
-//			}
+					for (Entry<String, Pattern> e : commands.entrySet()) {
+						if (e.getValue().matcher(readLine).matches()) {
+							toClient.writeChars(handleCommand(
+									currentEntityUser, e.getKey(), e.getValue()));
+						}
+					}
+				} while (readLine != null && !readLine.equals("quit"));
+				
+			
+				// Check username
+
+			}
 
 		} catch (IOException e) {
 			System.out.println("Class Server died: " + e.getMessage());
