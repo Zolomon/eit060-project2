@@ -64,10 +64,18 @@ public class Client {
 			
 			String readLine;
 			BufferedReader fromServer;
-			DataOutputStream toServer;
-			toServer = new DataOutputStream(client.getOutputStream());
+			BufferedWriter toServer;
+			
+			 OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
+	         toServer = new BufferedWriter(outputstreamwriter);
+	            
 			fromServer = new BufferedReader(new InputStreamReader(
-					client.getInputStream()));
+					System.in));
+			while((readLine = fromServer.readLine())!= null){
+				toServer.write(readLine + "\n");
+				toServer.flush();
+				System.out.println(readLine);
+			}
 			
 			
 

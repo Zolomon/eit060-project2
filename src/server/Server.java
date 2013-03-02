@@ -1,10 +1,12 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -133,7 +135,7 @@ public class Server {
 
 		SSLSocket client;
 		BufferedReader fromClient;
-		DataOutputStream toClient;
+		BufferedWriter toClient;
 		String readLine = null;
 
 		try {
@@ -174,41 +176,48 @@ public class Server {
 
 			System.out.println("Client connected ...");
 			System.out.println(client);
-			while (true) {
 
-				fromClient = new BufferedReader(new InputStreamReader(
-						client.getInputStream()));
-				toClient = new DataOutputStream(client.getOutputStream());
-				currentEntityUser = docs.get(0);
-				toClient.writeBytes(String.format("Welcome %s! %s\n\n",
-						currentEntityUser.getName(), currentEntityUser
-								.getClass().getName()));
-				// TODO: Fix login, fetch real logged in entity
-
-				 loginClient(fromClient, toClient);
-				 
-				do {
-					toClient.writeBytes("Enter your command: ");
+			fromClient = new BufferedReader(new InputStreamReader(
+					client.getInputStream()));
+			OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
+			toClient = new BufferedWriter(outputstreamwriter);
+			
+			while((readLine = fromClient.readLine())!= null){
+				System.out.println(readLine);
+				System.out.flush();
+				if(readLine.equals("quit")){
+					toClient.write("Do not even dare\n");
 					toClient.flush();
-					readLine = fromClient.readLine();
-
-					if (readLine.equals("exit)")) {
-						System.out.print("exit");
-					}
-
-					for (Entry<String, Pattern> e : commands.entrySet()) {
-						if (e.getValue().matcher(readLine).matches()) {
-							toClient.writeChars(handleCommand(
-									currentEntityUser, e.getKey(), e.getValue()));
-						}
-					}
-					
-				} while (readLine != null && !readLine.equals("quit"));
-
-				// Check username
-
+				}
 			}
-
+			
+			
+//			toClient.writeBytes("Enter your command: ");
+//			toClient.flush();
+//			
+//			readLine = fromClient.readLine();
+//			while (readLine != null && !readLine.equals("quit")) {
+//
+//				// loginClient(fromClient, toClient);
+//
+//				// TODO: Fix login, fetch real logged in entity
+//
+//				toClient.writeBytes("Enter your command: ");
+//				toClient.flush();
+//				readLine = fromClient.readLine();
+//
+//				for (Entry<String, Pattern> e : commands.entrySet()) {
+//					if (e.getValue().matcher(readLine).matches()) {
+//						toClient.writeChars(handleCommand(currentEntityUser,
+//								e.getKey(), e.getValue()));
+//					}
+//				}
+//
+//				// } while (readLine != null && !readLine.equals("quit"));
+//
+//				// Check username
+//
+//			}
 		} catch (IOException e) {
 			System.out.println("Class Server died: " + e.getMessage());
 			e.printStackTrace();
@@ -274,7 +283,7 @@ public class Server {
 	}
 
 	private void loginClient(BufferedReader fromClient,
-			DataOutputStream toClient) {
+			DataOutputStream toClient) throws IOException {
 	}
 
 	public static Record createJournal(Patient patient, Doctor doctor,
