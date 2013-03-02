@@ -6,6 +6,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.net.ServerSocket;
@@ -179,16 +180,18 @@ public class Server {
 
 			fromClient = new BufferedReader(new InputStreamReader(
 					client.getInputStream()));
-			OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
+			OutputStream outPut = null;
+			OutputStreamWriter outputstreamwriter = new OutputStreamWriter(outPut);
 			toClient = new BufferedWriter(outputstreamwriter);
 			
 			while((readLine = fromClient.readLine())!= null){
-				System.out.println(readLine);
-				System.out.flush();
 				if(readLine.equals("quit")){
+					
 					toClient.write("Do not even dare\n");
 					toClient.flush();
 				}
+				System.out.println(readLine);
+				System.out.flush();
 			}
 			
 			
