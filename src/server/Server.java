@@ -1,24 +1,12 @@
 package server;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
+import java.net.*;
+import javax.net.ssl.*;
 import java.math.BigInteger;
-import java.net.ServerSocket;
-import java.net.Socket;
+
 import java.nio.file.AccessDeniedException;
-import java.security.InvalidParameterException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,10 +14,7 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.*;
 import javax.security.cert.X509Certificate;
-
-import java.security.*;
 import java.security.cert.CertificateException;
 
 import util.*;
@@ -123,8 +108,8 @@ public class Server {
 		// BufferedReader and -Writer are instantiated
 		// for transmitting and receiving data.
 		SSLSocket client;
-		BufferedReader fromClient;
-		BufferedWriter toClient;
+		//BufferedReader fromClient;
+		//BufferedWriter toClient;
 		String readLine = null;
 
 		// Creating hashmap to store all of the commands
@@ -178,8 +163,7 @@ public class Server {
 			ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
 			SSLServerSocketFactory factory = ctx.getServerSocketFactory();
-			SSLServerSocket ss = (SSLServerSocket) factory
-					.createServerSocket(PORT);
+			SSLServerSocket ss = (SSLServerSocket) factory.createServerSocket(PORT);
 			ss.setNeedClientAuth(true);
 
 			System.out.println("Running server ...");
@@ -188,46 +172,46 @@ public class Server {
 
 			client = (SSLSocket) ss.accept();
 			SSLSession session = client.getSession();
-			X509Certificate cert = (X509Certificate) session
-					.getPeerCertificateChain()[0];
-
-			String subject = cert.getSubjectDN().getName();
-			System.out.println(subject);
-
+			printSocketInfo(client);
 			System.out.println("Client connected ...");
-			System.out.println(client);
-
-			PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+			
+			
+				
+			
+			PrintWriter out = new PrintWriter(new PrintWriter(client.getOutputStream()));
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					client.getInputStream()));
 
-			String inputLine;
-			String outputLine;
+			try{
+			
 
-			outputLine = processInput(null);
-			out.println(outputLine);
+			//outputLine = processInput(null);
+			//out.println(outputLine);
 
-			while ((inputLine = in.readLine()) != null) {
-				outputLine = processInput(inputLine);
-				out.println(outputLine);
-				if (outputLine.equals("exit"))
-					break;
-			}
+			//while ((clientOutput = in.readLine()) != null) {
+			//	clientOutput = processInput(serverInput);
+			//	out.println(clientOutput);
+			//	if (clientOutput.equals("exit"))
+			//		break;
+			//}
 
 			// fromClient = new BufferedReader(new InputStreamReader(
 			// client.getInputStream()));
 			//
 			//
-			// OutputStreamWriter outputstreamwriter = new
-			// OutputStreamWriter(client.getOutputStream());
-			// toClient = new BufferedWriter(outputstreamwriter);
+			// OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
+			//serverInput = new BufferedWriter(outputstreamwriter);
 			//
-			// while((readLine = fromClient.readLine())!= null){
-			// System.out.println(readLine);
-			// System.out.flush();
-			// }
+				String fromClient = null;
+			 while((fromClient = in.readLine())!= null){
+				 out.println(fromClient);
+				 fromClient = in.readLine();
+				 out.write(fromClient, 0, fromClient.length());
+				 out.println();
+				 out.flush();
+			 }
 
-			// toClient.writeBytes("Enter your command: ");
+			// out.writeBytes("Enter your command: ");
 			// toClient.flush();
 			//
 			// readLine = fromClient.readLine();
@@ -253,6 +237,12 @@ public class Server {
 			// // Check username
 			//
 			// }
+			}catch (Exception e){
+				e.printStackTrace();
+				System.out.println("The problem lays here");
+			}
+			
+			
 		} catch (IOException e) {
 			System.out.println("Class Server died: " + e.getMessage());
 			e.printStackTrace();
@@ -435,7 +425,9 @@ public class Server {
 		log.updateLog(new EntityAccessLogEvent(entity, record,
 				EntityWithAccessControl.READ));
 	}
-
+	/*
+	 * Deletes the medical journal
+	 */
 	public void deleteJournal(Record record, Entity entity)
 			throws AccessDeniedException {
 		try {
@@ -450,4 +442,24 @@ public class Server {
 		log.updateLog(new EntityAccessLogEvent(entity, record,
 				EntityWithAccessControl.READ));
 	}
+	
+	/*
+	 *	Prints out information about a newly connected client 
+	 */
+	private static void printSocketInfo(SSLSocket s){
+		System.out.println("Socket class: "+s.getClass());
+	      System.out.println("   Remote address = "
+	         +s.getInetAddress().toString());
+	      System.out.println("   Remote port = "+s.getPort());
+	      System.out.println("   Local socket address = "
+	         +s.getLocalSocketAddress().toString());
+	      System.out.println("   Local address = "
+	         +s.getLocalAddress().toString());
+	      System.out.println("   Local port = "+s.getLocalPort());
+	      System.out.println("   Need client authentication = "
+	         +s.getNeedClientAuth());
+	      SSLSession ss = s.getSession();
+	      System.out.println("   Cipher suite = "+ss.getCipherSuite());
+	      System.out.println("   Protocol = "+ss.getProtocol());
+	  	}
 }

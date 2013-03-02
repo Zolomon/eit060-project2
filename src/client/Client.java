@@ -21,9 +21,9 @@ public class Client {
 	private static final int PORT = 5678;
 
 	public static void main(String[] args) {
-		System.setProperty(
-				"javax.net.ssl.trustStore",
-				"C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\CA\\truststore");
+		
+		System.setProperty("javax.net.ssl.trustStore",
+				"C:\\Users\\Daniel\\Desktop\\Certificates Final\\CA\\truststore");
 
 		SSLSocketFactory factory = null;
 		SSLContext ctx = null;
@@ -31,12 +31,14 @@ public class Client {
 		KeyStore ks = null;
 		TrustManagerFactory tmf = null;
 
-		Scanner sc = new Scanner(System.in);
-		;
+		Scanner scan = new Scanner(System.in);
 		System.out.print("Namn: ");
-		String id = sc.next();
+		String id = scan.next();
 		System.out.print("Password: ");
-		String pass = sc.next();
+		String pass = scan.next();
+		
+		
+		//StringBuffer
 		try {
 			char[] passphrase = pass.toCharArray();
 
@@ -46,33 +48,58 @@ public class Client {
 			tmf = TrustManagerFactory.getInstance("SunX509");
 
 			ks.load(new FileInputStream(
-					"C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\"
+					"C:\\Users\\Daniel\\Desktop\\Certificates Final\\"
 							+ id + "\\" + id + ".jks"), passphrase);
+			
 
 			kmf.init(ks, passphrase);
 			tmf.init(ks);
 			ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
 			factory = ctx.getSocketFactory();
-
-			SSLSocket client = (SSLSocket) factory.createSocket("localhost",
-					PORT);
+			
+			
+			SSLSocket client = (SSLSocket) factory.createSocket("localhost", PORT);
 
 			client.setUseClientMode(true);
 			client.startHandshake();
 			System.out.println(client);
 			
-			String fromServer;
-			String fromUser;
-			BufferedReader in;
-			PrintWriter out;
-			out = new PrintWriter(client.getOutputStream(), true);
-			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(client.getOutputStream()), true);
+			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+			
+	
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			/*
 			while ((fromServer = in.readLine()) != null) {
-			    System.out.println("Server: " + fromServer);
-			    if (fromServer.equals("exit"))
-			        break;
+			    		System.out.println("Server: " + fromServer);
+			
 			    Scanner sc1 = new Scanner(System.in);
 			    fromUser = sc1.next();
 			    if (fromUser != null) {
@@ -80,18 +107,23 @@ public class Client {
 			        out.println(fromUser);
 			    }
 			}
+			*/
 			
 //			 OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
 //	         toServer = new BufferedWriter(outputstreamwriter);
-//	            
+	            
 //			fromServer = new BufferedReader(new InputStreamReader(
 //					System.in));
 //			
+//			
+//			String serverOutput;
+//			String clientInput;
+//			
 //			System.out.println("Write hello");
-//			while((readLine = fromServer.readLine())!= null){
-//				toServer.write(readLine + "\n");
-//				toServer.flush();
-//			}
+//			while((serverOutput = in.readLine())!= null){
+//				in.read(in);
+//				out.flush();
+			
 			
 			
 
