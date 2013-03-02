@@ -258,16 +258,46 @@ public class Server {
 		}
 	}
 
+	//handled commmunication between client and serve. is not finished and needs to be more generic
 	private static String processInput(String input){
 		String output = null;
 		
 		if(input == null){
 			output = "Your name is: ";
 		}
+		if(input.equals("doctor00")){
+			currentEntityUser = findEntity("doctor00");
+		}
 		
 		return output;
 	}
 	
+	
+	//finds the correct entity. is not finished.
+	private static Entity findEntity(String userName) {
+		
+		for(int i =0; i < docs.size(); i++){
+			if(docs.get(i).getName().equals(userName)){
+				return docs.get(i);
+			}
+		}
+		for(int i =0; i < nurses.size(); i++){
+			if(nurses.get(i).getName().equals(userName)){
+				return nurses.get(i);
+			}
+		}
+		for(int i =0; i < patients.size(); i++){
+			if(patients.get(i).getName().equals(userName)){
+				return patients.get(i);
+			}
+		}
+		
+		
+		return null;
+	}
+
+
+
 	public interface CommandHandler {
 		public String handleCommand(EntityWithAccessControl entity, Pattern p);
 	}
