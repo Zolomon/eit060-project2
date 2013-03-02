@@ -1,6 +1,5 @@
 package client;
 
-
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Scanner;
@@ -17,12 +16,9 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
-
-
 public class Client {
 
 	private static final int PORT = 5678;
-
 
 	public static void main(String[] args) {
 		System.setProperty(
@@ -34,8 +30,9 @@ public class Client {
 		KeyManagerFactory kmf = null;
 		KeyStore ks = null;
 		TrustManagerFactory tmf = null;
-		
-		Scanner sc = new Scanner(System.in);;
+
+		Scanner sc = new Scanner(System.in);
+		;
 		System.out.print("Namn: ");
 		String id = sc.next();
 		System.out.print("Password: ");
@@ -47,11 +44,11 @@ public class Client {
 			kmf = KeyManagerFactory.getInstance("SunX509");
 			ks = KeyStore.getInstance("JKS");
 			tmf = TrustManagerFactory.getInstance("SunX509");
-	
+
 			ks.load(new FileInputStream(
-					"C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\"+id+"\\"+id+".jks"),
-					passphrase);
-			
+					"C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\"
+							+ id + "\\" + id + ".jks"), passphrase);
+
 			kmf.init(ks, passphrase);
 			tmf.init(ks);
 			ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
@@ -60,27 +57,20 @@ public class Client {
 
 			SSLSocket client = (SSLSocket) factory.createSocket("localhost",
 					PORT);
-			String[] suit = client. getSupportedCipherSuites();
-			int i = 0;
-			while(i < suit.length){
-				System.out.print(suit[i]+"\n");
-				i++;
-			}
+
 			client.setUseClientMode(true);
 			client.startHandshake();
 			System.out.println(client);
+			
+			String readLine;
 			BufferedReader fromServer;
-			DataOutputStream  toServer;
+			DataOutputStream toServer;
 			toServer = new DataOutputStream(client.getOutputStream());
 			fromServer = new BufferedReader(new InputStreamReader(
 					client.getInputStream()));
-			while(true){
-			String inputLine = fromServer.readLine();
-			System.out.println(inputLine);
-			}
+			
 			
 
-			
 		} catch (UnknownHostException e) {
 			System.out.println("2");
 			e.printStackTrace();
@@ -103,6 +93,6 @@ public class Client {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 
+		}
 	}
-}
 }
