@@ -33,33 +33,32 @@ import java.security.*;
 import java.security.cert.CertificateException;
 
 import util.*;
-import util.logger.EntityAccessDeniedLogEvent;
-import util.logger.EntityAccessLogEvent;
-import util.logger.Log;
-import util.logger.LogEvent;
+import util.logger.*;
 
 public class Server {
+
+	// Initiate system before starting the server
 	private static HashMap<Integer, Division> divisions;
 	private static ArrayList<Doctor> docs;
 	private static ArrayList<Nurse> nurses;
 	private static ArrayList<Patient> patients;
 	private static ArrayList<Record> records;
-
 	private static GovernmentAgent agent;
 	private static Log log = new Log(System.out);
-
 	private static Entity currentEntityUser;
-
 	private static final int PORT = 5678;
 
 	public static void main(String[] args) {
-		System.setProperty(
-				"javax.net.ssl.trustStore",
-				"C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\CA\\truststore");
 
+		System.setProperty("javax.net.ssl.trustStore",
+				"C:\\Users\\Daniel\\Desktop\\Certificates Final\\CA\\truststore");
+
+		/*
+		 * Create hospital divisions according to UUH (Uppsala University
+		 * Hospital).
+		 * http://en.wikipedia.org/wiki/Uppsala_University_Hospital#Divisions
+		 */
 		divisions = new HashMap<Integer, Division>();
-
-		// http://en.wikipedia.org/wiki/Uppsala_University_Hospital#Divisions
 		divisions.put(0, new Division(
 				"Diagnostics, Anesthesia and Technology Division"));
 		divisions.put(1, new Division("Emergency and Rehabilitation Division"));
@@ -71,74 +70,94 @@ public class Server {
 				.put(6, new Division("Women's Health and Pediatrics Division"));
 		divisions.put(7, new Division("Socialstyrelsen"));
 
+		/*
+		 * Create a "Doctors"-list where all working doctors at the hospital are
+		 * put in, together with their division.
+		 */
 		docs = new ArrayList<Doctor>();
 		docs.add(new Doctor("doctor00", divisions.get(0)));
-		docs.add(new Doctor("Doctor d0_1", divisions.get(0)));
+		docs.add(new Doctor("doctor01", divisions.get(0)));
+		docs.add(new Doctor("doctor10", divisions.get(1)));
 
-		docs.add(new Doctor("Doctor d1_0", divisions.get(1)));
-
+		/*
+		 * Create a "Nurse"-list where all working nurses at the hospital are
+		 * put in, together with their division.
+		 */
 		nurses = new ArrayList<Nurse>();
-		nurses.add(new Nurse("Sabrewulf n0_0", divisions.get(0)));
-		nurses.add(new Nurse("Sabrewulf n0_1", divisions.get(0)));
+		nurses.add(new Nurse("nurse00", divisions.get(0)));
+		nurses.add(new Nurse("nurse01", divisions.get(0)));
+		nurses.add(new Nurse("nurse10", divisions.get(1)));
 
-		nurses.add(new Nurse("Eyedol n1_0", divisions.get(1)));
-
+		/*
+		 * Create a "Patient" -list where patients with injuries are put in,
+		 * together with their injury and what division they will need to visit.
+		 */
 		patients = new ArrayList<Patient>();
-		patients.add(new Patient("Spinal p5_0", "Broken back", divisions.get(0)));
-		patients.add(new Patient("Spinal p5_1", "Broken toe", divisions.get(0)));
-
-		patients.add(new Patient("Spinal p4_0", "Fractured skull", divisions
+		patients.add(new Patient("patient00", "Broken back", divisions.get(0)));
+		patients.add(new Patient("patient01", "Broken toe", divisions.get(0)));
+		patients.add(new Patient("patient10", "Fractured skull", divisions
 				.get(1)));
 
-		agent = new GovernmentAgent("FRA", divisions.get(7));
+		/*
+		 * Create a agent who is working for the government, is this case
+		 * "Socialstyrelsen".
+		 */
+		agent = new GovernmentAgent("agent", divisions.get(7));
 
+		/*
+		 * Create medical "Records"-list where all medicial journals are stored.
+		 */
 		records = new ArrayList<Record>();
 		records.add(createJournal(patients.get(0), docs.get(0), nurses.get(0)));
 		records.add(createJournal(patients.get(1), docs.get(1), nurses.get(1)));
 		records.add(createJournal(patients.get(2), docs.get(2), nurses.get(2)));
 
+		// Start the server
 		Server s = new Server();
 		s.run();
 	}
 
 	private void run() {
+		
+		// Create SSL Socket which will wait and listen for a request.
+		// BufferedReader and -Writer are instantiated
+		// for transmitting and receiving data.
+		SSLSocket client;
+		BufferedReader fromClient;
+		BufferedWriter toClient;
+		String readLine = null;
+
+		// Creating hashmap to store all of the commands
 		HashMap<String, Pattern> commands = new HashMap<String, Pattern>();
 
 		/*
 		 * Commands:
 		 * 
-		 * All: list records read record [record_id]
+		 * "All": list records read record [record_id]
 		 * 
-		 * Nurse: list patients write record [record_id] [data]
+		 * "Nurse": list patients write record [record_id] [data]
 		 * 
-		 * Doctor: list patients list nurses write record [record_id] [data]
+		 * "Doctor": list patients list nurses write record [record_id] [data]
 		 * create record [patient_id] [nurse_id] [data] assign [nurse_id] to
 		 * [patient_id]
 		 * 
-		 * Government Agent: delete [record_id]
+		 * "Government Agent": delete [record_id]
 		 */
 
 		commands.put("list records", Pattern.compile("list records"));
 		commands.put("list nurses", Pattern.compile("list nurses"));
 		commands.put("list patients", Pattern.compile("list patients"));
-
 		commands.put("read record",
 				Pattern.compile("read record (?<recordid>\\d+)"));
 		commands.put("write record",
 				Pattern.compile("write record (?<recordid>\\d+) (?<data>).*"));
 		commands.put("delete record",
 				Pattern.compile("delete record (?<recordid>\\d+)"));
-
 		commands.put(
 				"create record",
 				Pattern.compile("create record (?<patientid>\\d+) (?<nurseid>\\d+) (?<data>).*"));
 		commands.put("assign nurse", Pattern
 				.compile("assign (?<nurseid>\\d+) to (?<patientid>\\d+)"));
-
-		SSLSocket client;
-		BufferedReader fromClient;
-		BufferedWriter toClient;
-		String readLine = null;
 
 		try {
 
@@ -151,7 +170,7 @@ public class Server {
 					.getInstance("SunX509");
 
 			ks.load(new FileInputStream(
-					"C:\\Users\\Tobias\\Documents\\GitHub\\eit060-project2\\certificates\\server\\server.jks"),
+					"C:\\Users\\Daniel\\Desktop\\Certificates Final\\server\\server.jks"),
 					passphrase);
 
 			kmf.init(ks, passphrase);
@@ -159,20 +178,19 @@ public class Server {
 			ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
 			SSLServerSocketFactory factory = ctx.getServerSocketFactory();
-
 			SSLServerSocket ss = (SSLServerSocket) factory
 					.createServerSocket(PORT);
-
 			ss.setNeedClientAuth(true);
+
 			System.out.println("Running server ...");
 			System.out.println(ss);
 			System.out.println("Server is listening on port " + PORT);
 
 			client = (SSLSocket) ss.accept();
-
 			SSLSession session = client.getSession();
 			X509Certificate cert = (X509Certificate) session
 					.getPeerCertificateChain()[0];
+
 			String subject = cert.getSubjectDN().getName();
 			System.out.println(subject);
 
@@ -180,61 +198,61 @@ public class Server {
 			System.out.println(client);
 
 			PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-			BufferedReader in = 
-				    new BufferedReader(new InputStreamReader(client.getInputStream()));
-				String inputLine;
-				String outputLine;
-				
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					client.getInputStream()));
+
+			String inputLine;
+			String outputLine;
 
 			outputLine = processInput(null);
 			out.println(outputLine);
-			
-			while((inputLine = in.readLine()) != null){
+
+			while ((inputLine = in.readLine()) != null) {
 				outputLine = processInput(inputLine);
 				out.println(outputLine);
-				if(outputLine.equals("exit"))
+				if (outputLine.equals("exit"))
 					break;
 			}
-			
-//			fromClient = new BufferedReader(new InputStreamReader(
-//					client.getInputStream()));
-//			
-//
-//			OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
-//			toClient = new BufferedWriter(outputstreamwriter);
-//			
-//			while((readLine = fromClient.readLine())!= null){
-//					System.out.println(readLine);
-//					System.out.flush();
-//			}
-			
-			
-//			toClient.writeBytes("Enter your command: ");
-//			toClient.flush();
-//			
-//			readLine = fromClient.readLine();
-//			while (readLine != null && !readLine.equals("quit")) {
-//
-//				// loginClient(fromClient, toClient);
-//
-//				// TODO: Fix login, fetch real logged in entity
-//
-//				toClient.writeBytes("Enter your command: ");
-//				toClient.flush();
-//				readLine = fromClient.readLine();
-//
-//				for (Entry<String, Pattern> e : commands.entrySet()) {
-//					if (e.getValue().matcher(readLine).matches()) {
-//						toClient.writeChars(handleCommand(currentEntityUser,
-//								e.getKey(), e.getValue()));
-//					}
-//				}
-//
-//				// } while (readLine != null && !readLine.equals("quit"));
-//
-//				// Check username
-//
-//			}
+
+			// fromClient = new BufferedReader(new InputStreamReader(
+			// client.getInputStream()));
+			//
+			//
+			// OutputStreamWriter outputstreamwriter = new
+			// OutputStreamWriter(client.getOutputStream());
+			// toClient = new BufferedWriter(outputstreamwriter);
+			//
+			// while((readLine = fromClient.readLine())!= null){
+			// System.out.println(readLine);
+			// System.out.flush();
+			// }
+
+			// toClient.writeBytes("Enter your command: ");
+			// toClient.flush();
+			//
+			// readLine = fromClient.readLine();
+			// while (readLine != null && !readLine.equals("quit")) {
+			//
+			// // loginClient(fromClient, toClient);
+			//
+			// // TODO: Fix login, fetch real logged in entity
+			//
+			// toClient.writeBytes("Enter your command: ");
+			// toClient.flush();
+			// readLine = fromClient.readLine();
+			//
+			// for (Entry<String, Pattern> e : commands.entrySet()) {
+			// if (e.getValue().matcher(readLine).matches()) {
+			// toClient.writeChars(handleCommand(currentEntityUser,
+			// e.getKey(), e.getValue()));
+			// }
+			// }
+			//
+			// // } while (readLine != null && !readLine.equals("quit"));
+			//
+			// // Check username
+			//
+			// }
 		} catch (IOException e) {
 			System.out.println("Class Server died: " + e.getMessage());
 			e.printStackTrace();
@@ -257,46 +275,53 @@ public class Server {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	
+	/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
-	//handled commmunication between client and serve. is not finished and needs to be more generic
-	private static String processInput(String input){
+	// handled commmunication between client and serve. is not finished and
+	// needs to be more generic
+	private static String processInput(String input) {
 		String output = null;
-		
-		if(input == null){
+
+		if (input == null) {
 			output = "Your name is: ";
 		}
-		if(input.equals("doctor00")){
+		if (input.equals("doctor00")) {
 			currentEntityUser = findEntity("doctor00");
 		}
-		
+
 		return output;
 	}
-	
-	
-	//finds the correct entity. is not finished.
+
+	// finds the correct entity. is not finished.
 	private static Entity findEntity(String userName) {
-		
-		for(int i =0; i < docs.size(); i++){
-			if(docs.get(i).getName().equals(userName)){
+
+		for (int i = 0; i < docs.size(); i++) {
+			if (docs.get(i).getName().equals(userName)) {
 				return docs.get(i);
 			}
 		}
-		for(int i =0; i < nurses.size(); i++){
-			if(nurses.get(i).getName().equals(userName)){
+		for (int i = 0; i < nurses.size(); i++) {
+			if (nurses.get(i).getName().equals(userName)) {
 				return nurses.get(i);
 			}
 		}
-		for(int i =0; i < patients.size(); i++){
-			if(patients.get(i).getName().equals(userName)){
+		for (int i = 0; i < patients.size(); i++) {
+			if (patients.get(i).getName().equals(userName)) {
 				return patients.get(i);
 			}
 		}
-		
-		
+
 		return null;
 	}
-
-
+	
+	/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+	
+	
+	
+	
 
 	public interface CommandHandler {
 		public String handleCommand(EntityWithAccessControl entity, Pattern p);
@@ -339,12 +364,19 @@ public class Server {
 		return m.get(command).handleCommand(entity, p);
 	}
 
+	// EMPTY METHOD!
 	private void loginClient(BufferedReader fromClient,
 			DataOutputStream toClient) throws IOException {
 	}
 
+	/*
+	 * Creates private medical journal for a patient. In the journal the
+	 * assigned doctor, who treated the patient, and assisted nurse are store as
+	 * well.
+	 */
 	public static Record createJournal(Patient patient, Doctor doctor,
 			Nurse nurse) throws InvalidParameterException {
+		// Checks if all entities are in the same division
 		if (patient.getDivision() != nurse.getDivision()
 				&& nurse.getDivision() != doctor.getDivision()) {
 			// logs the false case. Should message be included?
@@ -362,6 +394,7 @@ public class Server {
 							doctor.getName()));
 		}
 
+		// If they are create new medical journal
 		Record record = new Record(patient, doctor, nurse, patient.getData());
 
 		// log update in true case.
