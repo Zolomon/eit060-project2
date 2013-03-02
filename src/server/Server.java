@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -178,17 +179,34 @@ public class Server {
 			System.out.println("Client connected ...");
 			System.out.println(client);
 
-			fromClient = new BufferedReader(new InputStreamReader(
-					client.getInputStream()));
-			
+			PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+			BufferedReader in = 
+				    new BufferedReader(new InputStreamReader(client.getInputStream()));
+				String inputLine;
+				String outputLine;
+				
 
-			OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
-			toClient = new BufferedWriter(outputstreamwriter);
+			outputLine = processInput(null);
+			out.println(outputLine);
 			
-			while((readLine = fromClient.readLine())!= null){
-				System.out.println(readLine);
-				System.out.flush();
+			while((inputLine = in.readLine()) != null){
+				outputLine = processInput(inputLine);
+				out.println(outputLine);
+				if(outputLine.equals("exit"))
+					break;
 			}
+			
+//			fromClient = new BufferedReader(new InputStreamReader(
+//					client.getInputStream()));
+//			
+//
+//			OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
+//			toClient = new BufferedWriter(outputstreamwriter);
+//			
+//			while((readLine = fromClient.readLine())!= null){
+//					System.out.println(readLine);
+//					System.out.flush();
+//			}
 			
 			
 //			toClient.writeBytes("Enter your command: ");
@@ -240,6 +258,16 @@ public class Server {
 		}
 	}
 
+	private static String processInput(String input){
+		String output = null;
+		
+		if(input == null){
+			output = "Your name is: ";
+		}
+		
+		return output;
+	}
+	
 	public interface CommandHandler {
 		public String handleCommand(EntityWithAccessControl entity, Pattern p);
 	}

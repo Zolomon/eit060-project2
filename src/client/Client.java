@@ -62,20 +62,36 @@ public class Client {
 			client.startHandshake();
 			System.out.println(client);
 			
-			String readLine;
-			BufferedReader fromServer;
-			BufferedWriter toServer;
+			String fromServer;
+			String fromUser;
+			BufferedReader in;
+			PrintWriter out;
+			out = new PrintWriter(client.getOutputStream(), true);
+			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			
-			 OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
-	         toServer = new BufferedWriter(outputstreamwriter);
-	            
-			fromServer = new BufferedReader(new InputStreamReader(
-					System.in));
-			while((readLine = fromServer.readLine())!= null){
-				toServer.write(readLine + "\n");
-				toServer.flush();
-
+			while ((fromServer = in.readLine()) != null) {
+			    System.out.println("Server: " + fromServer);
+			    if (fromServer.equals("exit"))
+			        break;
+			    Scanner sc1 = new Scanner(System.in);
+			    fromUser = sc1.next();
+			    if (fromUser != null) {
+			        System.out.println("Client: " + fromUser);
+			        out.println(fromUser);
+			    }
 			}
+			
+//			 OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
+//	         toServer = new BufferedWriter(outputstreamwriter);
+//	            
+//			fromServer = new BufferedReader(new InputStreamReader(
+//					System.in));
+//			
+//			System.out.println("Write hello");
+//			while((readLine = fromServer.readLine())!= null){
+//				toServer.write(readLine + "\n");
+//				toServer.flush();
+//			}
 			
 			
 
