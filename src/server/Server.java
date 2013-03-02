@@ -180,16 +180,12 @@ public class Server {
 
 			fromClient = new BufferedReader(new InputStreamReader(
 					client.getInputStream()));
-			OutputStream outPut = null;
-			OutputStreamWriter outputstreamwriter = new OutputStreamWriter(outPut);
+			
+
+			OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
 			toClient = new BufferedWriter(outputstreamwriter);
 			
 			while((readLine = fromClient.readLine())!= null){
-				if(readLine.equals("quit")){
-					
-					toClient.write("Do not even dare\n");
-					toClient.flush();
-				}
 				System.out.println(readLine);
 				System.out.flush();
 			}

@@ -74,6 +74,7 @@ public class Client {
 			while((readLine = fromServer.readLine())!= null){
 				toServer.write(readLine + "\n");
 				toServer.flush();
+
 			}
 			
 			
