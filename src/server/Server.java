@@ -103,47 +103,48 @@ public class Server {
 
 	private void run() {
 
-		// Create SSL Socket which will wait and listen for a request.
-		// BufferedReader and -Writer are instantiated
-		// for transmitting and receiving data.
-		SSLSocket client;
-		// BufferedReader fromClient;
-		// BufferedWriter toClient;
-		String readLine = null;
-
-		// Creating hashmap to store all of the commands
-		HashMap<String, Pattern> commands = new HashMap<String, Pattern>();
-
-		/*
-		 * Commands:
-		 * 
-		 * "All": list records read record [record_id]
-		 * 
-		 * "Nurse": list patients write record [record_id] [data]
-		 * 
-		 * "Doctor": list patients list nurses write record [record_id] [data]
-		 * create record [patient_id] [nurse_id] [data] assign [nurse_id] to
-		 * [patient_id]
-		 * 
-		 * "Government Agent": delete [record_id]
-		 */
-
-		commands.put("list records", Pattern.compile("list records"));
-		commands.put("list nurses", Pattern.compile("list nurses"));
-		commands.put("list patients", Pattern.compile("list patients"));
-		// commands.put("read record",
-		// Pattern.compile("read record (?<recordid>\\d+)"));
-		// commands.put("write record",
-		// Pattern.compile("write record (?<recordid>\\d+) (?<data>).*"));
-		// commands.put("delete record",
-		// Pattern.compile("delete record (?<recordid>\\d+)"));
-		// commands.put(
-		// "create record",
-		// Pattern.compile("create record (?<patientid>\\d+) (?<nurseid>\\d+) (?<data>).*"));
-		// commands.put("assign nurse", Pattern
-		// .compile("assign (?<nurseid>\\d+) to (?<patientid>\\d+)"));
-
 		try {
+			// Create SSL Socket which will wait and listen for a request.
+			// BufferedReader and -Writer are instantiated
+			// for transmitting and receiving data.
+			SSLSocket client;
+			// BufferedReader fromClient;
+			// BufferedWriter toClient;
+			String readLine = null;
+
+			// Creating hashmap to store all of the commands
+			HashMap<String, Pattern> commands = new HashMap<String, Pattern>();
+
+			/*
+			 * Commands:
+			 * 
+			 * "All": list records read record [record_id]
+			 * 
+			 * "Nurse": list patients write record [record_id] [data]
+			 * 
+			 * "Doctor": list patients list nurses write record [record_id]
+			 * [data] create record [patient_id] [nurse_id] [data] assign
+			 * [nurse_id] to [patient_id]
+			 * 
+			 * "Government Agent": delete [record_id]
+			 */
+
+			commands.put("list records", Pattern.compile("list records"));
+			commands.put("list nurses", Pattern.compile("list nurses"));
+			commands.put("list patients", Pattern.compile("list patients"));
+			// commands.put("read record",
+			// Pattern.compile("read record (?<recordid>\\d+)"));
+			// commands.put("write record",
+			// Pattern.compile("write record (?<recordid>\\d+) (?<data>).*"));
+			// commands.put("delete record",
+			// Pattern.compile("delete record (?<recordid>\\d+)"));
+			// commands.put(
+			// "create record",
+			// Pattern.compile("create record (?<patientid>\\d+) (?<nurseid>\\d+) (?<data>).*"));
+			// commands.put("assign nurse", Pattern
+			// .compile("assign (?<nurseid>\\d+) to (?<patientid>\\d+)"));
+
+			// try {
 
 			char[] passphrase = "password".toCharArray();
 
@@ -169,107 +170,161 @@ public class Server {
 			System.out.println(ss);
 			System.out.println("Server is listening on port " + PORT);
 
-			client = (SSLSocket) ss.accept();
-			SSLSession session = client.getSession();
-			printSocketInfo(client);
-			System.out.println("Client connected ...");
+			while (true) {
 
-			PrintWriter out = new PrintWriter(new PrintWriter(
-					client.getOutputStream()));
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					client.getInputStream()));
+				client = (SSLSocket) ss.accept();
+				SSLSession session = client.getSession();
+				printSocketInfo(client);
+				System.out.println("Client connected ...");
 
-			try {
+				PrintWriter toClient = new PrintWriter(new PrintWriter(
+						client.getOutputStream()));
+				BufferedReader fromClient = new BufferedReader(
+						new InputStreamReader(client.getInputStream()));
 
-				// outputLine = processInput(null);
-				// out.println(outputLine);
+				System.out.println("Client connected ...");
+				
+				System.out.println("Logging in client ...");
+				
+				// TODO: Login client
+				//loginClient(fromClient, toClient);
 
-				// while ((clientOutput = in.readLine()) != null) {
-				// clientOutput = processInput(serverInput);
-				// out.println(clientOutput);
-				// if (clientOutput.equals("exit"))
-				// break;
-				// }
+				// TODO: Fix login, fetch real logged in entity
+				currentEntityUser = patients.get(0);
 
-				// fromClient = new BufferedReader(new InputStreamReader(
-				// client.getInputStream()));
-				//
-				//
-				// OutputStreamWriter outputstreamwriter = new
-				// OutputStreamWriter(client.getOutputStream());
-				// serverInput = new BufferedWriter(outputstreamwriter);
-				//
-				System.out.println("Waiting for commands...");
-				String fromClient = null;
+				System.out.println(String.format("Welcome %s! %s\n",
+				 currentEntityUser.getName(), currentEntityUser
+				 .getClass().getName()));
+				
+				 toClient.write(String.format("Welcome %s! %s\n",
+				 currentEntityUser.getName(), currentEntityUser
+				 .getClass().getName()));
+				 toClient.flush();
+
+
 				do {
-					System.out.println("Received: " + fromClient);
-					out.write("Server received: " + fromClient + "\n");
-					out.flush();
-				} while ((fromClient = in.readLine()) != null);
-//				while ((fromClient = in.readLine()) != null) {
-//					System.out.println("Received: " + fromClient);
-//					out.write("Server received: " + fromClient);
-//					out.flush();
-//					//out.println(fromClient);
-//					//fromClient = in.readLine();
-//					//out.write(fromClient, 0, fromClient.length());
-//					//out.println();
-//					//out.flush();
-//				}
+					readLine = fromClient.readLine();
 
-				// out.writeBytes("Enter your command: ");
-				// toClient.flush();
-				//
-				// readLine = fromClient.readLine();
-				// while (readLine != null && !readLine.equals("quit")) {
-				//
-				// // loginClient(fromClient, toClient);
-				//
-				// // TODO: Fix login, fetch real logged in entity
-				//
-				// toClient.writeBytes("Enter your command: ");
-				// toClient.flush();
-				// readLine = fromClient.readLine();
-				//
-				// for (Entry<String, Pattern> e : commands.entrySet()) {
-				// if (e.getValue().matcher(readLine).matches()) {
-				// toClient.writeChars(handleCommand(currentEntityUser,
-				// e.getKey(), e.getValue()));
-				// }
-				// }
-				//
-				// // } while (readLine != null && !readLine.equals("quit"));
-				//
-				// // Check username
-				//
-				// }
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.out.println("The problem lays here");
+					for (Entry<String, Pattern> e : commands.entrySet()) {
+						if (e.getValue().matcher(readLine).matches()) {
+							toClient.write(handleCommand(currentEntityUser,
+									e.getKey(), e.getValue()));
+						}
+					}
+				} while (readLine != null && !readLine.equals("quit"));
+
+				// Check username
+				// trying to get the name of the "client"
+				// X509Certificate cert = (X509Certificate)session
+				// getPeerCertificateChain()[0];
+				// String subject = cert.getSubjectDN().getName();
+				// System.out.println (subject);
+
 			}
-
 		} catch (IOException e) {
-			System.out.println("Class Server died: " + e.getMessage());
 			e.printStackTrace();
 			log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
 					.toString()));
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (KeyStoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CertificateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (KeyManagementException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnrecoverableKeyException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
+	// try {
+
+	// outputLine = processInput(null);
+	// out.println(outputLine);
+
+	// while ((clientOutput = in.readLine()) != null) {
+	// clientOutput = processInput(serverInput);
+	// out.println(clientOutput);
+	// if (clientOutput.equals("exit"))
+	// break;
+	// }
+
+	// fromClient = new BufferedReader(new InputStreamReader(
+	// client.getInputStream()));
+	//
+	//
+	// OutputStreamWriter outputstreamwriter = new
+	// OutputStreamWriter(client.getOutputStream());
+	// serverInput = new BufferedWriter(outputstreamwriter);
+	//
+	// System.out.println("Waiting for commands...");
+	// String fromClient = null;
+	//
+	// do {
+	// fromClient = in.readLine();
+	// System.out.println("Received: " + fromClient);
+	// out.write("Server received: " + fromClient + "\n");
+	// out.flush();
+	// } while (fromClient != null);
+	//
+	// while ((fromClient = in.readLine()) != null) {
+	// System.out.println("Received: " + fromClient);
+	// out.write("Server received: " + fromClient);
+	// out.flush();
+	// //out.println(fromClient);
+	// //fromClient = in.readLine();
+	// //out.write(fromClient, 0, fromClient.length());
+	// //out.println();
+	// //out.flush();
+	// }
+
+	// out.writeBytes("Enter your command: ");
+	// toClient.flush();
+	//
+	// readLine = fromClient.readLine();
+	// while (readLine != null && !readLine.equals("quit")) {
+	//
+	// // loginClient(fromClient, toClient);
+	//
+	// // TODO: Fix login, fetch real logged in entity
+	//
+	// toClient.writeBytes("Enter your command: ");
+	// toClient.flush();
+	// readLine = fromClient.readLine();
+	//
+	// for (Entry<String, Pattern> e : commands.entrySet()) {
+	// if (e.getValue().matcher(readLine).matches()) {
+	// toClient.writeChars(handleCommand(currentEntityUser,
+	// e.getKey(), e.getValue()));
+	// }
+	// }
+	//
+	// // } while (readLine != null && !readLine.equals("quit"));
+	//
+	// // Check username
+	//
+	// }
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// System.out.println("The problem lays here");
+	// }
+
+	// } catch (IOException e) {
+	// System.out.println("Class Server died: " + e.getMessage());
+	// e.printStackTrace();
+	// log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
+	// .toString()));
+	// } catch (NoSuchAlgorithmException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// } catch (KeyStoreException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// } catch (CertificateException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// } catch (KeyManagementException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// } catch (UnrecoverableKeyException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	// }
 
 	/*
 	 * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

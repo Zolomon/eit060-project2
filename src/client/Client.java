@@ -70,20 +70,33 @@ public class Client {
 			PrintWriter out = new PrintWriter(new OutputStreamWriter(client.getOutputStream()), true);
 			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			
+			// Parse welcome message
+			System.out.println("Welcome: " + in.readLine());
+			
 			Scanner sc = new Scanner(System.in);
-			String input = sc.nextLine();
-			
-			System.out.println("Input: " + input);
-			
-			out.write(input + "\n");
-			out.flush();
-			
-			System.out.println("Sent :" + input);
-			
+						
+			// http://en.wikipedia.org/wiki/REPL
 			String response = null;
+			String input = null;
 			do {
+				System.out.print("Enter command: ");
+				
+				// Read - input from client -> server
+				input = sc.nextLine();
+				System.out.println("Input: " + input);
+				out.write(input + "\n");
+				out.flush();
+				
+				// Eval - output form server -> client
+				System.out.print("Reading: ");
+				System.out.println();
+				response = in.readLine();
+				
+				// Print - print result
 				System.out.println("From Server: " + response);
-			} while ((response = in.readLine()) != null);
+				
+				// Loop - repeat!
+			} while (response != null);
 	
 			
 			/*
