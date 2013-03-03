@@ -1,6 +1,7 @@
 package util;
 
-import java.nio.file.AccessDeniedException;
+import java.security.AccessControlException;
+
 
 public class Record {
 
@@ -43,29 +44,29 @@ public class Record {
 	}
 
 	public String readData(EntityWithAccessControl entity)
-			throws AccessDeniedException {
+			throws AccessControlException {
 		if (entity.canAccess(this, EntityWithAccessControl.READ))
 			return this.data;
 
-		throw new AccessDeniedException("Not enough access to read.");
+		throw new AccessControlException("Not enough access to read.");
 	}
 
 	public void writeData(EntityWithAccessControl entity, String data)
-			throws AccessDeniedException {
+			throws AccessControlException {
 		if (entity.canAccess(this, EntityWithAccessControl.WRITE)) {
 			this.data = data;
 			return;
 		}
-		throw new AccessDeniedException("Not enough access to write.");
+		throw new AccessControlException("Not enough access to write.");
 	}
 
 	public boolean delete(EntityWithAccessControl entity)
-			throws AccessDeniedException {
+			throws AccessControlException {
 		if (entity.canAccess(this, EntityWithAccessControl.EXECUTE)) {
 			toDelete = true;
 			return true;
 		}
-		throw new AccessDeniedException("Not enough access to delete.");
+		throw new AccessControlException("Not enough access to delete.");
 	}
 
 	public boolean toDelete() {

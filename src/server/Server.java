@@ -5,7 +5,6 @@ import java.net.*;
 import javax.net.ssl.*;
 import java.math.BigInteger;
 
-import java.nio.file.AccessDeniedException;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +35,7 @@ public class Server {
 	public static void main(String[] args) {
 
 		System.setProperty("javax.net.ssl.trustStore",
-				"C:\\Users\\Daniel\\Desktop\\Certificates Final\\CA\\truststore");
+				"./certificates/CA/truststore");
 
 		/*
 		 * Create hospital divisions according to UUH (Uppsala University
@@ -103,13 +102,13 @@ public class Server {
 	}
 
 	private void run() {
-		
+
 		// Create SSL Socket which will wait and listen for a request.
 		// BufferedReader and -Writer are instantiated
 		// for transmitting and receiving data.
 		SSLSocket client;
-		//BufferedReader fromClient;
-		//BufferedWriter toClient;
+		// BufferedReader fromClient;
+		// BufferedWriter toClient;
 		String readLine = null;
 
 		// Creating hashmap to store all of the commands
@@ -132,17 +131,17 @@ public class Server {
 		commands.put("list records", Pattern.compile("list records"));
 		commands.put("list nurses", Pattern.compile("list nurses"));
 		commands.put("list patients", Pattern.compile("list patients"));
-		commands.put("read record",
-				Pattern.compile("read record (?<recordid>\\d+)"));
-		commands.put("write record",
-				Pattern.compile("write record (?<recordid>\\d+) (?<data>).*"));
-		commands.put("delete record",
-				Pattern.compile("delete record (?<recordid>\\d+)"));
-		commands.put(
-				"create record",
-				Pattern.compile("create record (?<patientid>\\d+) (?<nurseid>\\d+) (?<data>).*"));
-		commands.put("assign nurse", Pattern
-				.compile("assign (?<nurseid>\\d+) to (?<patientid>\\d+)"));
+		// commands.put("read record",
+		// Pattern.compile("read record (?<recordid>\\d+)"));
+		// commands.put("write record",
+		// Pattern.compile("write record (?<recordid>\\d+) (?<data>).*"));
+		// commands.put("delete record",
+		// Pattern.compile("delete record (?<recordid>\\d+)"));
+		// commands.put(
+		// "create record",
+		// Pattern.compile("create record (?<patientid>\\d+) (?<nurseid>\\d+) (?<data>).*"));
+		// commands.put("assign nurse", Pattern
+		// .compile("assign (?<nurseid>\\d+) to (?<patientid>\\d+)"));
 
 		try {
 
@@ -154,8 +153,7 @@ public class Server {
 			TrustManagerFactory tmf = TrustManagerFactory
 					.getInstance("SunX509");
 
-			ks.load(new FileInputStream(
-					"C:\\Users\\Daniel\\Desktop\\Certificates Final\\server\\server.jks"),
+			ks.load(new FileInputStream("./certificates/server/server.jks"),
 					passphrase);
 
 			kmf.init(ks, passphrase);
@@ -163,7 +161,8 @@ public class Server {
 			ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
 			SSLServerSocketFactory factory = ctx.getServerSocketFactory();
-			SSLServerSocket ss = (SSLServerSocket) factory.createServerSocket(PORT);
+			SSLServerSocket ss = (SSLServerSocket) factory
+					.createServerSocket(PORT);
 			ss.setNeedClientAuth(true);
 
 			System.out.println("Running server ...");
@@ -174,75 +173,72 @@ public class Server {
 			SSLSession session = client.getSession();
 			printSocketInfo(client);
 			System.out.println("Client connected ...");
-			
-			
-				
-			
-			PrintWriter out = new PrintWriter(new PrintWriter(client.getOutputStream()));
+
+			PrintWriter out = new PrintWriter(new PrintWriter(
+					client.getOutputStream()));
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					client.getInputStream()));
 
-			try{
-			
+			try {
 
-			//outputLine = processInput(null);
-			//out.println(outputLine);
+				// outputLine = processInput(null);
+				// out.println(outputLine);
 
-			//while ((clientOutput = in.readLine()) != null) {
-			//	clientOutput = processInput(serverInput);
-			//	out.println(clientOutput);
-			//	if (clientOutput.equals("exit"))
-			//		break;
-			//}
+				// while ((clientOutput = in.readLine()) != null) {
+				// clientOutput = processInput(serverInput);
+				// out.println(clientOutput);
+				// if (clientOutput.equals("exit"))
+				// break;
+				// }
 
-			// fromClient = new BufferedReader(new InputStreamReader(
-			// client.getInputStream()));
-			//
-			//
-			// OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
-			//serverInput = new BufferedWriter(outputstreamwriter);
-			//
+				// fromClient = new BufferedReader(new InputStreamReader(
+				// client.getInputStream()));
+				//
+				//
+				// OutputStreamWriter outputstreamwriter = new
+				// OutputStreamWriter(client.getOutputStream());
+				// serverInput = new BufferedWriter(outputstreamwriter);
+				//
 				String fromClient = null;
-			 while((fromClient = in.readLine())!= null){
-				 out.println(fromClient);
-				 fromClient = in.readLine();
-				 out.write(fromClient, 0, fromClient.length());
-				 out.println();
-				 out.flush();
-			 }
+				while ((fromClient = in.readLine()) != null) {
+					out.println(fromClient);
+					fromClient = in.readLine();
+					out.write(fromClient, 0, fromClient.length());
+					out.println();
+					out.flush();
+				}
 
-			// out.writeBytes("Enter your command: ");
-			// toClient.flush();
-			//
-			// readLine = fromClient.readLine();
-			// while (readLine != null && !readLine.equals("quit")) {
-			//
-			// // loginClient(fromClient, toClient);
-			//
-			// // TODO: Fix login, fetch real logged in entity
-			//
-			// toClient.writeBytes("Enter your command: ");
-			// toClient.flush();
-			// readLine = fromClient.readLine();
-			//
-			// for (Entry<String, Pattern> e : commands.entrySet()) {
-			// if (e.getValue().matcher(readLine).matches()) {
-			// toClient.writeChars(handleCommand(currentEntityUser,
-			// e.getKey(), e.getValue()));
-			// }
-			// }
-			//
-			// // } while (readLine != null && !readLine.equals("quit"));
-			//
-			// // Check username
-			//
-			// }
-			}catch (Exception e){
+				// out.writeBytes("Enter your command: ");
+				// toClient.flush();
+				//
+				// readLine = fromClient.readLine();
+				// while (readLine != null && !readLine.equals("quit")) {
+				//
+				// // loginClient(fromClient, toClient);
+				//
+				// // TODO: Fix login, fetch real logged in entity
+				//
+				// toClient.writeBytes("Enter your command: ");
+				// toClient.flush();
+				// readLine = fromClient.readLine();
+				//
+				// for (Entry<String, Pattern> e : commands.entrySet()) {
+				// if (e.getValue().matcher(readLine).matches()) {
+				// toClient.writeChars(handleCommand(currentEntityUser,
+				// e.getKey(), e.getValue()));
+				// }
+				// }
+				//
+				// // } while (readLine != null && !readLine.equals("quit"));
+				//
+				// // Check username
+				//
+				// }
+			} catch (Exception e) {
 				e.printStackTrace();
 				System.out.println("The problem lays here");
 			}
-			
-			
+
 		} catch (IOException e) {
 			System.out.println("Class Server died: " + e.getMessage());
 			e.printStackTrace();
@@ -265,10 +261,11 @@ public class Server {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	
-	/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+
+	/*
+	 * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	 * >>>>>>>>>>>>>>>>
+	 */
 
 	// handled commmunication between client and serve. is not finished and
 	// needs to be more generic
@@ -306,12 +303,11 @@ public class Server {
 
 		return null;
 	}
-	
-	/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-	
-	
-	
-	
+
+	/*
+	 * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	 * >>>>>>>>>>>>>>>>
+	 */
 
 	public interface CommandHandler {
 		public String handleCommand(EntityWithAccessControl entity, Pattern p);
@@ -395,10 +391,10 @@ public class Server {
 	}
 
 	public String readData(Record record, Entity entity)
-			throws AccessDeniedException {
+			throws AccessControlException {
 		try {
 			return record.readData(entity);
-		} catch (AccessDeniedException e) {
+		} catch (AccessControlException e) {
 
 			// logs in false case
 			log.updateLog(new EntityAccessDeniedLogEvent(entity, record,
@@ -412,10 +408,10 @@ public class Server {
 	}
 
 	public void writeData(Record record, Entity entity, String data)
-			throws AccessDeniedException {
+			throws AccessControlException {
 		try {
 			record.writeData(entity, data);
-		} catch (AccessDeniedException e) {
+		} catch (AccessControlException e) {
 			// logs in false case
 			log.updateLog(new EntityAccessDeniedLogEvent(entity, record,
 					EntityWithAccessControl.READ));
@@ -425,14 +421,15 @@ public class Server {
 		log.updateLog(new EntityAccessLogEvent(entity, record,
 				EntityWithAccessControl.READ));
 	}
+
 	/*
 	 * Deletes the medical journal
 	 */
 	public void deleteJournal(Record record, Entity entity)
-			throws AccessDeniedException {
+			throws AccessControlException {
 		try {
 			record.delete(entity);
-		} catch (AccessDeniedException e) {
+		} catch (AccessControlException e) {
 			// logs in false case
 			log.updateLog(new EntityAccessDeniedLogEvent(entity, record,
 					EntityWithAccessControl.READ));
@@ -442,24 +439,24 @@ public class Server {
 		log.updateLog(new EntityAccessLogEvent(entity, record,
 				EntityWithAccessControl.READ));
 	}
-	
+
 	/*
-	 *	Prints out information about a newly connected client 
+	 * Prints out information about a newly connected client
 	 */
-	private static void printSocketInfo(SSLSocket s){
-		System.out.println("Socket class: "+s.getClass());
-	      System.out.println("   Remote address = "
-	         +s.getInetAddress().toString());
-	      System.out.println("   Remote port = "+s.getPort());
-	      System.out.println("   Local socket address = "
-	         +s.getLocalSocketAddress().toString());
-	      System.out.println("   Local address = "
-	         +s.getLocalAddress().toString());
-	      System.out.println("   Local port = "+s.getLocalPort());
-	      System.out.println("   Need client authentication = "
-	         +s.getNeedClientAuth());
-	      SSLSession ss = s.getSession();
-	      System.out.println("   Cipher suite = "+ss.getCipherSuite());
-	      System.out.println("   Protocol = "+ss.getProtocol());
-	  	}
+	private static void printSocketInfo(SSLSocket s) {
+		System.out.println("Socket class: " + s.getClass());
+		System.out.println("   Remote address = "
+				+ s.getInetAddress().toString());
+		System.out.println("   Remote port = " + s.getPort());
+		System.out.println("   Local socket address = "
+				+ s.getLocalSocketAddress().toString());
+		System.out.println("   Local address = "
+				+ s.getLocalAddress().toString());
+		System.out.println("   Local port = " + s.getLocalPort());
+		System.out.println("   Need client authentication = "
+				+ s.getNeedClientAuth());
+		SSLSession ss = s.getSession();
+		System.out.println("   Cipher suite = " + ss.getCipherSuite());
+		System.out.println("   Protocol = " + ss.getProtocol());
+	}
 }

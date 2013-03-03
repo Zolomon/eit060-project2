@@ -1,6 +1,6 @@
 package tests;
 
-import java.nio.file.AccessDeniedException;
+import java.security.AccessControlException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,13 +70,13 @@ public class TestEntities {
 			TestGovernmentAgentReadAccess();
 			TestGovernmentAgentDeleteAccess();
 
-		} catch (AccessDeniedException e) {
+		} catch (AccessControlException e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
 		}
 	}
 
-	private static void TestPatientReadAccess() throws AccessDeniedException {
+	private static void TestPatientReadAccess() throws AccessControlException {
 		// A pateint should only be able to read patient's own journal.
 
 		Patient p0 = patients.get(0);
@@ -90,7 +90,7 @@ public class TestEntities {
 				result ? "succeeded" : "failed"));
 	}
 
-	private static void TestPatientWriteAccess() throws AccessDeniedException {
+	private static void TestPatientWriteAccess() throws AccessControlException {
 		// A patient should be able to write to no journals.
 
 		Patient p0 = patients.get(0);
@@ -112,7 +112,7 @@ public class TestEntities {
 
 	}
 
-	private static void TestNurseReadAccess() throws AccessDeniedException {
+	private static void TestNurseReadAccess() throws AccessControlException {
 		// A nurse should be able to read its patient's journal, and other
 		// patients' journals who are in the same division.
 
@@ -135,7 +135,7 @@ public class TestEntities {
 				result ? "succeeded" : "failed"));
 	}
 
-	private static void TestNurseWriteAccess() throws AccessDeniedException {
+	private static void TestNurseWriteAccess() throws AccessControlException {
 		// A nurse should be able to write to its patient's journal, and to
 		// noone else's.
 
@@ -158,7 +158,7 @@ public class TestEntities {
 				result ? "succeeded" : "failed"));
 	}
 
-	private static void TestDoctorReadAccess() throws AccessDeniedException {
+	private static void TestDoctorReadAccess() throws AccessControlException {
 		// A doctor should be able to read its patient's journals, and
 		// those in the same division
 
@@ -187,7 +187,7 @@ public class TestEntities {
 				result ? "succeeded" : "failed"));
 	}
 
-	private static void TestDoctorWriteAccess() throws AccessDeniedException {
+	private static void TestDoctorWriteAccess() throws AccessControlException {
 		// A doctor can write to its patients' journals, but no other.
 
 		Patient p0 = patients.get(0);
@@ -217,7 +217,7 @@ public class TestEntities {
 	}
 
 	private static void TestGovernmentAgentReadAccess()
-			throws AccessDeniedException {
+			throws AccessControlException {
 		Patient p0 = patients.get(0);
 		Patient p1 = patients.get(1);
 		Patient p2 = patients.get(2);
@@ -244,7 +244,7 @@ public class TestEntities {
 	}
 
 	private static void TestGovernmentAgentDeleteAccess()
-			throws AccessDeniedException {
+			throws AccessControlException {
 		Patient p0 = patients.get(0);
 
 		Record j0 = server.createJournal(p0, docs.get(0), nurses.get(0));

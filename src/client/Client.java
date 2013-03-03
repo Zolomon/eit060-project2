@@ -23,7 +23,7 @@ public class Client {
 	public static void main(String[] args) {
 		
 		System.setProperty("javax.net.ssl.trustStore",
-				"C:\\Users\\Daniel\\Desktop\\Certificates Final\\CA\\truststore");
+				"./certificates/CA/truststore");
 
 		SSLSocketFactory factory = null;
 		SSLContext ctx = null;
@@ -48,8 +48,9 @@ public class Client {
 			tmf = TrustManagerFactory.getInstance("SunX509");
 
 			ks.load(new FileInputStream(
-					"C:\\Users\\Daniel\\Desktop\\Certificates Final\\"
-							+ id + "\\" + id + ".jks"), passphrase);
+					"./certificates/"
+							+ id + "/" + id + ".jks"), passphrase);
+			
 			
 
 			kmf.init(ks, passphrase);
@@ -69,31 +70,20 @@ public class Client {
 			PrintWriter out = new PrintWriter(new OutputStreamWriter(client.getOutputStream()), true);
 			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			
-	
+			Scanner sc = new Scanner(System.in);
+			String input = sc.nextLine();
 			
+			System.out.println("Input: " + input);
 			
+			out.write(input);
+			out.flush();
 			
+			System.out.println("Sent :" + input);
 			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
+			String response;
+			while ((response = in.readLine()) != null) {
+				System.out.println("From Server: " + response);
+			}
 			
 			
 			/*
