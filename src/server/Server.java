@@ -199,14 +199,23 @@ public class Server {
 				// OutputStreamWriter(client.getOutputStream());
 				// serverInput = new BufferedWriter(outputstreamwriter);
 				//
+				System.out.println("Waiting for commands...");
 				String fromClient = null;
-				while ((fromClient = in.readLine()) != null) {
-					out.println(fromClient);
-					fromClient = in.readLine();
-					out.write(fromClient, 0, fromClient.length());
-					out.println();
+				do {
+					System.out.println("Received: " + fromClient);
+					out.write("Server received: " + fromClient + "\n");
 					out.flush();
-				}
+				} while ((fromClient = in.readLine()) != null);
+//				while ((fromClient = in.readLine()) != null) {
+//					System.out.println("Received: " + fromClient);
+//					out.write("Server received: " + fromClient);
+//					out.flush();
+//					//out.println(fromClient);
+//					//fromClient = in.readLine();
+//					//out.write(fromClient, 0, fromClient.length());
+//					//out.println();
+//					//out.flush();
+//				}
 
 				// out.writeBytes("Enter your command: ");
 				// toClient.flush();

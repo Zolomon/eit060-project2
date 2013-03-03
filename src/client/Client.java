@@ -75,15 +75,19 @@ public class Client {
 			
 			System.out.println("Input: " + input);
 			
-			out.write(input);
+			out.write(input + "\n");
 			out.flush();
 			
 			System.out.println("Sent :" + input);
 			
-			String response;
-			while ((response = in.readLine()) != null) {
+			String response = null;
+			do {
 				System.out.println("From Server: " + response);
-			}
+			} while ((response = in.readLine()) != null);
+//			while ((response = in.readLine()) != null) {
+//				
+//				System.out.println("From Server: " + response);
+//			}
 			
 			
 			/*
