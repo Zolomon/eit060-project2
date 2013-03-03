@@ -453,6 +453,7 @@ public class Server {
 	 * Prints out information about a newly connected client
 	 */
 	private static void printSocketInfo(SSLSocket s) {
+		System.out.println("-> New client connecting:");
 		System.out.println("Socket class: " + s.getClass());
 		System.out.println("   Remote address = "
 				+ s.getInetAddress().toString());

@@ -84,11 +84,7 @@ public class Client {
 			do {
 				System.out.println("From Server: " + response);
 			} while ((response = in.readLine()) != null);
-//			while ((response = in.readLine()) != null) {
-//				
-//				System.out.println("From Server: " + response);
-//			}
-			
+	
 			
 			/*
 			while ((fromServer = in.readLine()) != null) {
