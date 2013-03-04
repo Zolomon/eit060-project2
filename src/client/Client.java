@@ -17,12 +17,15 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
 import util.NetworkCommunication;
+import util.PasswordManager;
 
 public class Client {
 
 	private static final int PORT = 5678;
 
 	public static void main(String[] args) {
+
+		PasswordManager pwMn = new PasswordManager();
 
 		System.setProperty("javax.net.ssl.trustStore",
 				"./certificates/CA/truststore");
@@ -54,7 +57,7 @@ public class Client {
 				notFound = false;
 			} catch (FileNotFoundException e) {
 				notFound = true;
-				System.out.println("Wrong id or password, please try again");
+				System.out.println("Wrong name or password, please try again");
 			}
 
 		}
@@ -91,6 +94,7 @@ public class Client {
 					fromServer);
 
 			nc.send(name);
+
 			nc.send(id);
 			System.out.println(nc.receive());
 			System.out.println(nc.receive());

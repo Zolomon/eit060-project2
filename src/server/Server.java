@@ -31,6 +31,7 @@ import util.EntityWithAccessControl;
 import util.GovernmentAgent;
 import util.NetworkCommunication;
 import util.Nurse;
+import util.PasswordManager;
 import util.Patient;
 import util.Record;
 import util.logger.EntityAccessDeniedLogEvent;
@@ -50,12 +51,9 @@ public class Server {
 	private static Log log = new Log(System.out);
 	private static Entity currentEntityUser;
 	private static final int PORT = 5678;
+	private static PasswordManager pwMn = new PasswordManager();
 
 	public static void main(String[] args) {
-
-		// every entity has a password stored in the server's "database" so a
-		// two-factor auth
-		// can be done
 
 		System.setProperty("javax.net.ssl.trustStore",
 				"./certificates/CA/truststore");
@@ -86,6 +84,11 @@ public class Server {
 		docs.add(new Doctor("doctor01", divisions.get(0), "doc1"));
 		docs.add(new Doctor("doctor10", divisions.get(1), "doc2"));
 
+		// creating the hashed passwords for doctors
+		pwMn.createPassword("doctor00", "doc0");
+		pwMn.createPassword("doctor01", "doc1");
+		pwMn.createPassword("doctor10", "doc2");
+
 		/*
 		 * Create a "Nurse"-list where all working nurses at the hospital are
 		 * put in, together with their division.
@@ -94,6 +97,11 @@ public class Server {
 		nurses.add(new Nurse("nurse00", divisions.get(0), "nur0"));
 		nurses.add(new Nurse("nurse01", divisions.get(0), "nur1"));
 		nurses.add(new Nurse("nurse10", divisions.get(1), "nur2"));
+
+		// creating the hashed passwords for nurses
+		pwMn.createPassword("nurse00", "nur0");
+		pwMn.createPassword("nurse01", "nur1");
+		pwMn.createPassword("nurse10", "nur2");
 
 		/*
 		 * Create a "Patient" -list where patients with injuries are put in,
@@ -107,11 +115,19 @@ public class Server {
 		patients.add(new Patient("patient10", "Fractured skull", divisions
 				.get(1), "pat2"));
 
+		// creating the hashed passwords for patients
+		pwMn.createPassword("patient00", "pat0");
+		pwMn.createPassword("patient01", "pat1");
+		pwMn.createPassword("patient10", "pat2");
+
 		/*
 		 * Create a agent who is working for the government, is this case
 		 * "Socialstyrelsen".
 		 */
 		agent = new GovernmentAgent("agent", divisions.get(7), "age0");
+
+		// creating hashed password for gov agent
+		pwMn.createPassword("agent", "age0");
 
 		/*
 		 * Create medical "Records"-list where all medicial journals are stored.
@@ -215,7 +231,8 @@ public class Server {
 				String name = nc.receive();
 				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
 						"name has been received from client"));
-				String pass = nc.receive();
+
+				String id = nc.receive();
 				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
 						"pass has been received from client"));
 
@@ -226,12 +243,14 @@ public class Server {
 				currentEntityUser = findEntity(name);
 
 				nc.send("Checking users id against database...");
-				if (!pass.equals(currentEntityUser.getPass())) {
+				if (!id.equals(currentEntityUser.getPass())) {
 					System.out
 							.println("id doesn't match. Shuting down system...");
 					nc.send("id doesnt match. Shouting down system...");
-					log.updateLog(new LogEvent(Log.LVL_WARNING, "Client",
+					log.updateLog(new LogEvent(Log.LVL_WARNING,
+							"pw.fault increment",
 							"Client's pass doesn't match entity's"));
+					currentEntityUser.incrementPw_fault();
 				} else {
 					nc.send("Success!");
 					log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
@@ -457,6 +476,7 @@ public class Server {
 
 			});
 
+			// inte färdig
 			put("write record", new CommandHandler() {
 
 				@Override
