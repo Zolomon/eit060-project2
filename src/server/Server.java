@@ -250,7 +250,6 @@ public class Server {
 					log.updateLog(new LogEvent(Log.LVL_WARNING,
 							"pw.fault increment",
 							"Client's pass doesn't match entity's"));
-					currentEntityUser.incrementPw_fault();
 				} else {
 					nc.send("Success!");
 					log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
@@ -403,9 +402,15 @@ public class Server {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
-
+					sb.append("Record #\tPatient #\tPatient\tNurse #\tNurse\tDoctor #\tDoctor");
+					
+					
 					for (Record r : getReadableRecords(entity))
-						sb.append(r.toString() + "\n");
+						sb.append(String.format("%d\t%d\t%s\t%d\t%s\t%d\t%s\n",
+								r.getId(), r.getPatient().getId(),
+								r.getPatient().getName(), r.getNurse().getId(),
+								r.getNurse().getName(), r.getDoctor().getId(),
+								r.getDoctor().getName()));
 
 					return sb.toString();
 				}
