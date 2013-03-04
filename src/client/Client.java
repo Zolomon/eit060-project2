@@ -46,7 +46,7 @@ public class Client {
 				Scanner scan = new Scanner(System.in);
 				System.out.print("Namn: ");
 				name = scan.next();
-				System.out.print("Password: ");
+				System.out.print("Password for cert: ");
 				pass = scan.next();
 
 				stream = new FileInputStream("./certificates/" + name + "/"
@@ -91,7 +91,16 @@ public class Client {
 					fromServer);
 
 			nc.send(name);
+			
+			byte[] salt = nc.receiveByteArray();
+			
+			Scanner scan = new Scanner(System.in);
+			System.out.print("Password: ");
+			String psw = scan.next();
 
+			byte[] hashUser = pwMn.getHash(1, psw, salt);
+			nc.sendByteArray(hashUser);
+			
 			// Parse welcome message
 			System.out.println("Welcome: " + nc.receive());
 

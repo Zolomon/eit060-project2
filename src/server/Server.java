@@ -235,9 +235,12 @@ public class Server {
 				System.out.println("Logging in client ...");
 
 				currentEntityUser = findEntity(name);
-		
-					log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
-							"Client's pass match its entity"));
+				
+				byte[] userSalt = pwMn.getSalt(name);
+				nc.sendByteArray(userSalt);
+				byte[] hashUser = nc.receiveByteArray();
+				
+				if(pwMn.checkPassword(name, hashUser)){	
 					System.out.println(String.format("Welcome %s! %s",
 							currentEntityUser.getName(), currentEntityUser
 									.getClass().getName()));
@@ -268,7 +271,7 @@ public class Server {
 					} while (readLine != null && !readLine.equals("quit"));
 
 				}
-			
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
