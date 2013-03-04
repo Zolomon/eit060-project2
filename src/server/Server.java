@@ -374,7 +374,7 @@ public class Server {
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
 
-					sb.append("Patient #id\t\tName\tData\n");
+					sb.append("Patient #id\tName\tData\n");
 					sb.append("################################\n");
 
 					for (Patient r : getPatientsForEntity(entity))
