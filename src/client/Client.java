@@ -89,7 +89,8 @@ public class Client {
 
 				// Eval - output form server -> client
 				response = nc.receive();
-				System.out.println("Read Server: " + response);
+				System.out.println("Read Server:");
+				System.out.println(response);
 
 				// Print - print result
 				// System.out.println("Handled: " + response);

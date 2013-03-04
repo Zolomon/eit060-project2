@@ -134,15 +134,15 @@ public class Server {
 			commands.put("list nurses", Pattern.compile("list nurses"));
 			commands.put("list patients", Pattern.compile("list patients"));
 			commands.put("read record", Pattern.compile("read record (\\d+)"));
-			commands.put("write record", Pattern
-					.compile("write record (\\d+) (.*)"));
+			commands.put("write record",
+					Pattern.compile("write record (\\d+) (.*)"));
 			commands.put("delete record",
 					Pattern.compile("delete record (\\d+)"));
 			commands.put(
 					"create record",
 					Pattern.compile("create record for patient (\\d+) with nurse (\\d+) and data (.*)"));
-			commands.put("assign nurse", Pattern
-					.compile("assign nurse (\\d+) to patient (\\d+)"));
+			commands.put("assign nurse",
+					Pattern.compile("assign nurse (\\d+) to patient (\\d+)"));
 
 			// try {
 
@@ -273,33 +273,70 @@ public class Server {
 		return result;
 	}
 
+	private List<Nurse> getNursesForEntity(Entity entity) {
+		List<Nurse> result = new ArrayList<Nurse>();
+
+		for (Nurse n : nurses) {
+			if (entity.getDivision().getId().equals(n.getDivision().getId()))
+				result.add(n);
+		}
+
+		return result;
+	}
+
+	private List<Patient> getPatientsForEntity(Entity entity) {
+		List<Patient> result = new ArrayList<Patient>();
+
+		for (Patient p : patients) {
+			if (entity.getDivision().getId().equals(p.getDivision().getId())) 
+				result.add(p);
+		}
+
+		return result;
+	}
+
 	@SuppressWarnings("serial")
 	HashMap<String, CommandHandler> m = new HashMap<String, CommandHandler>() {
 		{
+			// commands.put("list patients", Pattern.compile("list patients"));
+			// commands.put("read record",
+			// Pattern.compile("read record (\\d+)"));
+			// commands.put("write record",
+			// Pattern.compile("write record (\\d+) (.*)"));
+			// commands.put("delete record",
+			// Pattern.compile("delete record (\\d+)"));
+			// commands.put(
+			// "create record",
+			// Pattern.compile("create record for patient (\\d+) with nurse (\\d+) and data (.*)"));
+			// commands.put("assign nurse",
+			// Pattern.compile("assign nurse (\\d+) to patient (\\d+)"));
+
 			put("help", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity,
-						Pattern p) {
-					System.out.println(String.format("Handling [%s] ...", p.pattern()));
+				public String handleCommand(Entity entity, Pattern p) {
+					System.out.println(String.format("Handling [%s] ...",
+							p.pattern()));
 					StringBuilder sb = new StringBuilder();
 
 					sb.append("Command: \t\t\tFormat:\n");
-					
-					for (Map.Entry<String, Pattern> command : commands.entrySet())
-						sb.append(String.format("%s\t\t\t%s\n", command.getKey(), command.getValue().pattern()));
+
+					for (Map.Entry<String, Pattern> command : commands
+							.entrySet())
+						sb.append(String.format("%s\t\t\t%s\n",
+								command.getKey(), command.getValue().pattern()));
 
 					return sb.toString();
 				}
 
 			});
-			
+
 			put("list records", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity,
-						Pattern p) {
-					System.out.println(String.format("Handling [%s] ...", p.pattern()));
+				public String handleCommand(Entity entity, Pattern p) {
+					System.out.println(String.format("Handling [%s] ...",
+							p.pattern()));
 					StringBuilder sb = new StringBuilder();
 
 					for (Record r : getReadableRecords(entity))
@@ -309,28 +346,45 @@ public class Server {
 				}
 
 			});
-			
+
 			put("list nurses", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity,
-						Pattern p) {
-					System.out.println(String.format("Handling [%s] ...", p.pattern()));
+				public String handleCommand(Entity entity, Pattern p) {
+					System.out.println(String.format("Handling [%s] ...",
+							p.pattern()));
 					StringBuilder sb = new StringBuilder();
 
+					sb.append("Nurse #id\tName\n");
+					sb.append("################################\n");
+
 					for (Nurse r : getNursesForEntity(entity))
-						sb.append(r.toString() + "\n");
+						sb.append(String.format("%d\t%s\n", r.getId(),
+								r.getName()));
+
+					return sb.toString();
+				}
+			});
+
+			put("list patients", new CommandHandler() {
+
+				@Override
+				public String handleCommand(Entity entity, Pattern p) {
+					System.out.println(String.format("Handling [%s] ...",
+							p.pattern()));
+					StringBuilder sb = new StringBuilder();
+
+					sb.append("Patient #id\t\tName\tData\n");
+					sb.append("################################\n");
+
+					for (Patient r : getPatientsForEntity(entity))
+						sb.append(String.format("%d\t\t%s\t%s\n", r.getId(),
+								r.getName(), r.getData()));
 
 					return sb.toString();
 				}
 
-				private ArrayList<Nurse> getNursesForEntity(Entity entity) {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
 			});
-
 		}
 	};
 	private HashMap<String, Pattern> commands;
