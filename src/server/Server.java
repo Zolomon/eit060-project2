@@ -212,7 +212,7 @@ public class Server {
 					for (Entry<String, Pattern> e : commands.entrySet()) {
 						if (e.getValue().matcher(readLine).matches()) {
 							nc.send(handleCommand(currentEntityUser,
-									e.getKey(), e.getValue()));
+									e.getKey(), e.getValue(), readLine));
 						}
 					}
 
@@ -253,13 +253,8 @@ public class Server {
 		return null;
 	}
 
-	/*
-	 * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	 * >>>>>>>>>>>>>>>>
-	 */
-
 	public interface CommandHandler {
-		public String handleCommand(Entity entity, Pattern p);
+		public String handleCommand(Entity entity, Pattern p, String value);
 	}
 
 	public List<Record> getReadableRecords(Entity entity) {
@@ -298,7 +293,7 @@ public class Server {
 	@SuppressWarnings("serial")
 	HashMap<String, CommandHandler> m = new HashMap<String, CommandHandler>() {
 		{
-			// commands.put("list patients", Pattern.compile("list patients"));
+			//// commands.put("list patients", Pattern.compile("list patients"));
 			// commands.put("read record",
 			// Pattern.compile("read record (\\d+)"));
 			// commands.put("write record",
@@ -314,7 +309,7 @@ public class Server {
 			put("help", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p) {
+				public String handleCommand(Entity entity, Pattern p, String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
@@ -334,7 +329,7 @@ public class Server {
 			put("list records", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p) {
+				public String handleCommand(Entity entity, Pattern p, String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
@@ -350,7 +345,7 @@ public class Server {
 			put("list nurses", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p) {
+				public String handleCommand(Entity entity, Pattern p, String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
@@ -369,13 +364,13 @@ public class Server {
 			put("list patients", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p) {
+				public String handleCommand(Entity entity, Pattern p, String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
 
-					sb.append("Patient #id\tName\tData\n");
-					sb.append("################################\n");
+					sb.append("Patient #id\tName\t\tData\n");
+					sb.append("######################################\n");
 
 					for (Patient r : getPatientsForEntity(entity))
 						sb.append(String.format("%d\t\t%s\t%s\n", r.getId(),
@@ -385,14 +380,36 @@ public class Server {
 				}
 
 			});
+			
+			put("read record", new CommandHandler() {
+
+				@Override
+				public String handleCommand(Entity entity, Pattern p, String value) {
+					System.out.println(String.format("Handling [%s] ...",
+							p.pattern()));
+					StringBuilder sb = new StringBuilder();
+
+					for (Record r : records) {
+						if (r.getId() == Integer.parseInt(p.matcher(value).group(0)) && 
+								entity.canAccess(r, EntityWithAccessControl.READ)) {
+							sb.append(r.toString());
+						}
+					}
+					
+					return sb.toString();
+				}
+
+			});
+			
+			
 		}
 	};
 	private HashMap<String, Pattern> commands;
 
-	private String handleCommand(Entity entity, String command, Pattern p) {
+	private String handleCommand(Entity entity, String command, Pattern p, String value) {
 		System.out.println(String.format("Handling command [%s] for [#%d, %s]",
 				command, entity.getId(), entity.getName()));
-		return m.get(command).handleCommand(entity, p);
+		return m.get(command).handleCommand(entity, p, value);
 	}
 
 	// EMPTY METHOD!
