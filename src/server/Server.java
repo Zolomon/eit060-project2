@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -235,6 +236,7 @@ public class Server {
 				System.out.println("Logging in client ...");
 
 				currentEntityUser = findEntity(name);
+
 				
 				byte[] userSalt = pwMn.getSalt(name);
 				nc.sendByteArray(userSalt);
@@ -256,22 +258,26 @@ public class Server {
 								readLine));
 						System.out.println("read: " + readLine);
 
-						if (readLine == null) {
-							log.updateLog(new LogEvent(Log.LVL_INFO,
-									"Client info", "readLine was null"));
-							break;
+					if (readLine == null) {
+						log.updateLog(new LogEvent(Log.LVL_INFO, "Client info",
+								"readLine was null"));
+						break;
+					}
+					for (Entry<String, Pattern> e : commands.entrySet()) {
+						if (e.getValue().matcher(readLine).matches()) {
+							nc.send(handleCommand(currentEntityUser,
+									e.getKey(), e.getValue(), readLine));
 						}
-						for (Entry<String, Pattern> e : commands.entrySet()) {
-							if (e.getValue().matcher(readLine).matches()) {
-								nc.send(handleCommand(currentEntityUser,
-										e.getKey(), e.getValue(), readLine));
-							}
-						}
+					}
 
-					} while (readLine != null && !readLine.equals("quit"));
+				} while (readLine != null && !readLine.equals("quit"));
+
+			}
+
 
 				}
-			}
+			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
@@ -389,9 +395,16 @@ public class Server {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
+					sb.append("Rec#\tPat#\tPatient\t\tNur#\tNurse\tDoc#\tDoctor\n");
+					sb.append("################################################################\n");
 
 					for (Record r : getReadableRecords(entity))
-						sb.append(r.toString() + "\n");
+						sb.append(String.format("%d\t%d\t%s\t%d\t%s\t%d\t%s\n",
+								r.getId(), r.getPatient().getId(), r
+										.getPatient().getName(), r.getNurse()
+										.getId(), r.getNurse().getName(), r
+										.getDoctor().getId(), r.getDoctor()
+										.getName()));
 
 					return sb.toString();
 				}
@@ -448,13 +461,21 @@ public class Server {
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
 
+					Matcher matcher = p.matcher(value);
+					boolean success = false;
 					for (Record r : records) {
-						if (r.getId() == Integer.parseInt(p.matcher(value)
-								.group(0))
+						if (matcher.matches()
+								&& r.getId() == Integer.parseInt(matcher
+										.group(1))
 								&& entity.canAccess(r,
 										EntityWithAccessControl.READ)) {
 							sb.append(r.toString());
+							success = true;
 						}
+					}
+					
+					if (!success) {
+						sb.append("Failed to read record");
 					}
 
 					return sb.toString();

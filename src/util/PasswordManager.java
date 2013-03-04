@@ -6,9 +6,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import util.logger.Log;
-import util.logger.LogEvent;
-
 public class PasswordManager {
 
 	public class HashedPassword {
