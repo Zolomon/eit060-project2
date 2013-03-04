@@ -36,18 +36,21 @@ public class Client {
 		boolean notFound = true;
 		FileInputStream stream = null;
 		String pass = null;
+		String name = null;
 		String id = null;
 
 		while (notFound) {
 			try {
 				Scanner scan = new Scanner(System.in);
 				System.out.print("Namn: ");
-				id = scan.next();
+				name = scan.next();
 				System.out.print("Password: ");
 				pass = scan.next();
+				System.out.print("id: ");
+				id = scan.next();
 
-				stream = new FileInputStream("./certificates/" + id + "/" + id
-						+ ".jks");
+				stream = new FileInputStream("./certificates/" + name + "/"
+						+ name + ".jks");
 				notFound = false;
 			} catch (FileNotFoundException e) {
 				notFound = true;
@@ -87,7 +90,10 @@ public class Client {
 			NetworkCommunication nc = new NetworkCommunication(toServer,
 					fromServer);
 
+			nc.send(name);
 			nc.send(id);
+			System.out.println(nc.receive());
+			System.out.println(nc.receive());
 
 			// Parse welcome message
 			System.out.println("Welcome: " + nc.receive());

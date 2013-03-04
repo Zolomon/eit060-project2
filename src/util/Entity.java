@@ -6,11 +6,13 @@ public abstract class Entity implements EntityWithAccessControl {
 	private static int id;
 	private int myId;
 	protected String myType = "Entity";
+	private String pass;
 
-	public Entity(String name, Division division) {
+	public Entity(String name, Division division, String pass) {
 		this.name = name;
 		this.division = division;
 		this.myId = id++;
+		this.pass = pass;
 	}
 
 	public int getId() {
@@ -27,5 +29,9 @@ public abstract class Entity implements EntityWithAccessControl {
 
 	public String getType() {
 		return myType;
+	}
+	
+	public String getPass(){
+		return pass;
 	}
 }

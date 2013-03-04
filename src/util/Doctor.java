@@ -2,8 +2,8 @@ package util;
 
 public class Doctor extends Entity {
 
-	public Doctor(String name, Division division) {
-		super(name, division);
+	public Doctor(String name, Division division, String pass) {
+		super(name, division, pass);
 		this.myType = "Doctor";
 	}
 

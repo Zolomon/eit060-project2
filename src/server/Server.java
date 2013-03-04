@@ -53,6 +53,10 @@ public class Server {
 
 	public static void main(String[] args) {
 
+		// every entity has a password stored in the server's "database" so a
+		// two-factor auth
+		// can be done
+
 		System.setProperty("javax.net.ssl.trustStore",
 				"./certificates/CA/truststore");
 
@@ -78,34 +82,36 @@ public class Server {
 		 * put in, together with their division.
 		 */
 		docs = new ArrayList<Doctor>();
-		docs.add(new Doctor("doctor00", divisions.get(0)));
-		docs.add(new Doctor("doctor01", divisions.get(0)));
-		docs.add(new Doctor("doctor10", divisions.get(1)));
+		docs.add(new Doctor("doctor00", divisions.get(0), "doc0"));
+		docs.add(new Doctor("doctor01", divisions.get(0), "doc1"));
+		docs.add(new Doctor("doctor10", divisions.get(1), "doc2"));
 
 		/*
 		 * Create a "Nurse"-list where all working nurses at the hospital are
 		 * put in, together with their division.
 		 */
 		nurses = new ArrayList<Nurse>();
-		nurses.add(new Nurse("nurse00", divisions.get(0)));
-		nurses.add(new Nurse("nurse01", divisions.get(0)));
-		nurses.add(new Nurse("nurse10", divisions.get(1)));
+		nurses.add(new Nurse("nurse00", divisions.get(0), "nur0"));
+		nurses.add(new Nurse("nurse01", divisions.get(0), "nur1"));
+		nurses.add(new Nurse("nurse10", divisions.get(1), "nur2"));
 
 		/*
 		 * Create a "Patient" -list where patients with injuries are put in,
 		 * together with their injury and what division they will need to visit.
 		 */
 		patients = new ArrayList<Patient>();
-		patients.add(new Patient("patient00", "Broken back", divisions.get(0)));
-		patients.add(new Patient("patient01", "Broken toe", divisions.get(0)));
+		patients.add(new Patient("patient00", "Broken back", divisions.get(0),
+				"pat0"));
+		patients.add(new Patient("patient01", "Broken toe", divisions.get(0),
+				"pat1"));
 		patients.add(new Patient("patient10", "Fractured skull", divisions
-				.get(1)));
+				.get(1), "pat2"));
 
 		/*
 		 * Create a agent who is working for the government, is this case
 		 * "Socialstyrelsen".
 		 */
-		agent = new GovernmentAgent("agent", divisions.get(7));
+		agent = new GovernmentAgent("agent", divisions.get(7), "age0");
 
 		/*
 		 * Create medical "Records"-list where all medicial journals are stored.
@@ -198,41 +204,50 @@ public class Server {
 				NetworkCommunication nc = new NetworkCommunication(toClient,
 						fromClient);
 
-
 				// id is set to the id which the user types in at the client
 				// side
 
-				String id = nc.receive();
+				String name = nc.receive();
+				String pass = nc.receive();
 
 				System.out.println("Client connected ...");
 
 				System.out.println("Logging in client ...");
 
-				currentEntityUser = findEntity(id);
+				currentEntityUser = findEntity(name);
 
-				System.out.println(String.format("Welcome %s! %s",
-						currentEntityUser.getName(), currentEntityUser
-								.getClass().getName()));
+				nc.send("Checking users id against database...");
+				if (!pass.equals(currentEntityUser.getPass())) {
+					System.out
+							.println("id doesn't match. Shuting down system...");
+					nc.send("id doesnt match. Shouting down system...");
+				} else {
+					nc.send("Success!");
 
-				nc.send(String.format("Welcome %s! %s", currentEntityUser
-						.getName(), currentEntityUser.getClass().getName()));
+					System.out.println(String.format("Welcome %s! %s",
+							currentEntityUser.getName(), currentEntityUser
+									.getClass().getName()));
 
-				do {
-					readLine = nc.receive();
-					System.out.println("read: " + readLine);
+					nc.send(String.format("Welcome %s! %s", currentEntityUser
+							.getName(), currentEntityUser.getClass().getName()));
 
-					if (readLine == null)
-						break;
+					do {
+						readLine = nc.receive();
+						System.out.println("read: " + readLine);
 
-					for (Entry<String, Pattern> e : commands.entrySet()) {
-						if (e.getValue().matcher(readLine).matches()) {
-							nc.send(handleCommand(currentEntityUser,
-									e.getKey(), e.getValue(), readLine)); 
+						if (readLine == null)
+							break;
+
+						for (Entry<String, Pattern> e : commands.entrySet()) {
+							if (e.getValue().matcher(readLine).matches()) {
+								nc.send(handleCommand(currentEntityUser,
+										e.getKey(), e.getValue(), readLine));
+							}
 						}
-					}
 
-				} while (readLine != null && !readLine.equals("quit"));
+					} while (readLine != null && !readLine.equals("quit"));
 
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -269,7 +284,7 @@ public class Server {
 	}
 
 	public interface CommandHandler {
-		public String handleCommand(Entity entity, Pattern p, String value); 
+		public String handleCommand(Entity entity, Pattern p, String value);
 	}
 
 	public List<Record> getReadableRecords(Entity entity) {
@@ -324,7 +339,8 @@ public class Server {
 			put("help", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p, String value) {
+				public String handleCommand(Entity entity, Pattern p,
+						String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
@@ -344,7 +360,8 @@ public class Server {
 			put("list records", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p, String value) {
+				public String handleCommand(Entity entity, Pattern p,
+						String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
@@ -360,7 +377,8 @@ public class Server {
 			put("list nurses", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p, String value) {
+				public String handleCommand(Entity entity, Pattern p,
+						String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
@@ -379,12 +397,13 @@ public class Server {
 			put("list patients", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p, String value) {
+				public String handleCommand(Entity entity, Pattern p,
+						String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
 
-					sb.append("Patient #id\tName\t\tData\n"); 	
+					sb.append("Patient #id\tName\t\tData\n");
 					sb.append("######################################\n");
 
 					for (Patient r : getPatientsForEntity(entity))
@@ -395,23 +414,40 @@ public class Server {
 				}
 
 			});
-			
+
 			put("read record", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p, String value) {
+				public String handleCommand(Entity entity, Pattern p,
+						String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
 
 					for (Record r : records) {
-						if (r.getId() == Integer.parseInt(p.matcher(value).group(0)) && 
-								entity.canAccess(r, EntityWithAccessControl.READ)) {
+						if (r.getId() == Integer.parseInt(p.matcher(value)
+								.group(0))
+								&& entity.canAccess(r,
+										EntityWithAccessControl.READ)) {
 							sb.append(r.toString());
 						}
 					}
-					
+
 					return sb.toString();
+				}
+
+			});
+
+			put("write record", new CommandHandler() {
+
+				@Override
+				public String handleCommand(Entity entity, Pattern p,
+						String value) {
+					System.out.println(String.format("Handling [%s] ...",
+							p.pattern()));
+					StringBuilder sb = new StringBuilder();
+
+					return null;
 				}
 
 			});
@@ -419,7 +455,8 @@ public class Server {
 	};
 	private HashMap<String, Pattern> commands;
 
-	private String handleCommand(Entity entity, String command, Pattern p, String value) {
+	private String handleCommand(Entity entity, String command, Pattern p,
+			String value) {
 		System.out.println(String.format("Handling command [%s] for [#%d, %s]",
 				command, entity.getId(), entity.getName()));
 		return m.get(command).handleCommand(entity, p, value);
