@@ -259,10 +259,10 @@ public class Server {
 	 */
 
 	public interface CommandHandler {
-		public String handleCommand(EntityWithAccessControl entity, Pattern p);
+		public String handleCommand(Entity entity, Pattern p);
 	}
 
-	public List<Record> getReadableRecords(EntityWithAccessControl entity) {
+	public List<Record> getReadableRecords(Entity entity) {
 		List<Record> result = new ArrayList<Record>();
 
 		for (Record r : records) {
@@ -279,7 +279,7 @@ public class Server {
 			put("help", new CommandHandler() {
 
 				@Override
-				public String handleCommand(EntityWithAccessControl entity,
+				public String handleCommand(Entity entity,
 						Pattern p) {
 					System.out.println(String.format("Handling [%s] ...", p.pattern()));
 					StringBuilder sb = new StringBuilder();
@@ -297,7 +297,7 @@ public class Server {
 			put("list records", new CommandHandler() {
 
 				@Override
-				public String handleCommand(EntityWithAccessControl entity,
+				public String handleCommand(Entity entity,
 						Pattern p) {
 					System.out.println(String.format("Handling [%s] ...", p.pattern()));
 					StringBuilder sb = new StringBuilder();
@@ -309,6 +309,28 @@ public class Server {
 				}
 
 			});
+			
+			put("list nurses", new CommandHandler() {
+
+				@Override
+				public String handleCommand(Entity entity,
+						Pattern p) {
+					System.out.println(String.format("Handling [%s] ...", p.pattern()));
+					StringBuilder sb = new StringBuilder();
+
+					for (Nurse r : getNursesForEntity(entity))
+						sb.append(r.toString() + "\n");
+
+					return sb.toString();
+				}
+
+				private ArrayList<Nurse> getNursesForEntity(Entity entity) {
+					// TODO Auto-generated method stub
+					return null;
+				}
+
+			});
+
 		}
 	};
 	private HashMap<String, Pattern> commands;
