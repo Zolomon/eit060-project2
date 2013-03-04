@@ -224,12 +224,13 @@ public class Server {
 				NetworkCommunication nc = new NetworkCommunication(toClient,
 						fromClient);
 
-				// id is set to the id which the user types in at the client
-				// side
-
 				String name = nc.receive();
-				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
-						"name has been received from client"));
+//				byte[] userSalt = pwMn.getSalt(name);
+//				
+//				nc.sendByteArray(userSalt);
+//				
+//				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
+//						"name has been received from client"));
 
 				System.out.println("Client connected ...");
 
@@ -238,11 +239,9 @@ public class Server {
 				currentEntityUser = findEntity(name);
 
 				
-				byte[] userSalt = pwMn.getSalt(name);
-				nc.sendByteArray(userSalt);
-				byte[] hashUser = nc.receiveByteArray();
-				
-				if(pwMn.checkPassword(name, hashUser)){	
+//				byte[] hashUser = nc.receiveByteArray();
+
+				//if (pwMn.checkPassword(name, hashUser)) {
 					System.out.println(String.format("Welcome %s! %s",
 							currentEntityUser.getName(), currentEntityUser
 									.getClass().getName()));
@@ -258,25 +257,23 @@ public class Server {
 								readLine));
 						System.out.println("read: " + readLine);
 
-					if (readLine == null) {
-						log.updateLog(new LogEvent(Log.LVL_INFO, "Client info",
-								"readLine was null"));
-						break;
-					}
-					for (Entry<String, Pattern> e : commands.entrySet()) {
-						if (e.getValue().matcher(readLine).matches()) {
-							nc.send(handleCommand(currentEntityUser,
-									e.getKey(), e.getValue(), readLine));
+						if (readLine == null) {
+							log.updateLog(new LogEvent(Log.LVL_INFO,
+									"Client info", "readLine was null"));
+							break;
 						}
-					}
+						for (Entry<String, Pattern> e : commands.entrySet()) {
+							if (e.getValue().matcher(readLine).matches()) {
+								nc.send(handleCommand(currentEntityUser,
+										e.getKey(), e.getValue(), readLine));
+							}
+						}
 
-				} while (readLine != null && !readLine.equals("quit"));
-
-			}
-
+					} while (readLine != null && !readLine.equals("quit"));
 
 				}
-			
+
+			//}
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -473,7 +470,7 @@ public class Server {
 							success = true;
 						}
 					}
-					
+
 					if (!success) {
 						sb.append("Failed to read record");
 					}
