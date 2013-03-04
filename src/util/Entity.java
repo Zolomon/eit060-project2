@@ -6,14 +6,13 @@ public abstract class Entity implements EntityWithAccessControl {
 	private static int id;
 	private int myId;
 	protected String myType = "Entity";
-	private String pass;
-	private int pw_fault = 0;
 
-	public Entity(String name, Division division, String pass) {
+	
+
+	public Entity(String name, Division division) {
 		this.name = name;
 		this.division = division;
 		this.myId = id++;
-		this.pass = pass;
 	}
 
 	public int getId() {
@@ -30,14 +29,5 @@ public abstract class Entity implements EntityWithAccessControl {
 
 	public String getType() {
 		return myType;
-	}
-	
-	public String getPass(){
-		return pass;
-	}
-	
-	public void incrementPw_fault(){
-		pw_fault++;
-		
 	}
 }

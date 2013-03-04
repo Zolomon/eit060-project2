@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -80,9 +81,9 @@ public class Server {
 		 * put in, together with their division.
 		 */
 		docs = new ArrayList<Doctor>();
-		docs.add(new Doctor("doctor00", divisions.get(0), "doc0"));
-		docs.add(new Doctor("doctor01", divisions.get(0), "doc1"));
-		docs.add(new Doctor("doctor10", divisions.get(1), "doc2"));
+		docs.add(new Doctor("doctor00", divisions.get(0)));
+		docs.add(new Doctor("doctor01", divisions.get(0)));
+		docs.add(new Doctor("doctor10", divisions.get(1)));
 
 		// creating the hashed passwords for doctors
 		pwMn.createPassword("doctor00", "doc0");
@@ -94,9 +95,9 @@ public class Server {
 		 * put in, together with their division.
 		 */
 		nurses = new ArrayList<Nurse>();
-		nurses.add(new Nurse("nurse00", divisions.get(0), "nur0"));
-		nurses.add(new Nurse("nurse01", divisions.get(0), "nur1"));
-		nurses.add(new Nurse("nurse10", divisions.get(1), "nur2"));
+		nurses.add(new Nurse("nurse00", divisions.get(0)));
+		nurses.add(new Nurse("nurse01", divisions.get(0)));
+		nurses.add(new Nurse("nurse10", divisions.get(1)));
 
 		// creating the hashed passwords for nurses
 		pwMn.createPassword("nurse00", "nur0");
@@ -108,12 +109,10 @@ public class Server {
 		 * together with their injury and what division they will need to visit.
 		 */
 		patients = new ArrayList<Patient>();
-		patients.add(new Patient("patient00", "Broken back", divisions.get(0),
-				"pat0"));
-		patients.add(new Patient("patient01", "Broken toe", divisions.get(0),
-				"pat1"));
+		patients.add(new Patient("patient00", "Broken back", divisions.get(0)));
+		patients.add(new Patient("patient01", "Broken toe", divisions.get(0)));
 		patients.add(new Patient("patient10", "Fractured skull", divisions
-				.get(1), "pat2"));
+				.get(1)));
 
 		// creating the hashed passwords for patients
 		pwMn.createPassword("patient00", "pat0");
@@ -124,7 +123,7 @@ public class Server {
 		 * Create a agent who is working for the government, is this case
 		 * "Socialstyrelsen".
 		 */
-		agent = new GovernmentAgent("agent", divisions.get(7), "age0");
+		agent = new GovernmentAgent("agent", divisions.get(7));
 
 		// creating hashed password for gov agent
 		pwMn.createPassword("agent", "age0");
@@ -232,59 +231,45 @@ public class Server {
 				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
 						"name has been received from client"));
 
-				String id = nc.receive();
-				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
-						"pass has been received from client"));
-
 				System.out.println("Client connected ...");
 
 				System.out.println("Logging in client ...");
 
 				currentEntityUser = findEntity(name);
 
-				nc.send("Checking users id against database...");
-				if (!id.equals(currentEntityUser.getPass())) {
-					System.out
-							.println("id doesn't match. Shuting down system...");
-					nc.send("id doesnt match. Shouting down system...");
-					log.updateLog(new LogEvent(Log.LVL_WARNING,
-							"pw.fault increment",
-							"Client's pass doesn't match entity's"));
-				} else {
-					nc.send("Success!");
-					log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
-							"Client's pass match its entity"));
-					System.out.println(String.format("Welcome %s! %s",
-							currentEntityUser.getName(), currentEntityUser
-									.getClass().getName()));
+				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
+						"Client's pass match its entity"));
+				System.out.println(String.format("Welcome %s! %s",
+						currentEntityUser.getName(), currentEntityUser
+								.getClass().getName()));
 
-					nc.send(String.format("Welcome %s! %s", currentEntityUser
-							.getName(), currentEntityUser.getClass().getName()));
-					log.updateLog(new LogEvent(Log.LVL_INFO, "Server",
-							"Welcome has been sent"));
+				nc.send(String.format("Welcome %s! %s", currentEntityUser
+						.getName(), currentEntityUser.getClass().getName()));
+				log.updateLog(new LogEvent(Log.LVL_INFO, "Server",
+						"Welcome has been sent"));
 
-					do {
-						readLine = nc.receive();
+				do {
+					readLine = nc.receive();
+					log.updateLog(new LogEvent(Log.LVL_INFO, "Client info",
+							readLine));
+					System.out.println("read: " + readLine);
+
+					if (readLine == null) {
 						log.updateLog(new LogEvent(Log.LVL_INFO, "Client info",
-								readLine));
-						System.out.println("read: " + readLine);
-
-						if (readLine == null) {
-							log.updateLog(new LogEvent(Log.LVL_INFO,
-									"Client info", "readLine was null"));
-							break;
+								"readLine was null"));
+						break;
+					}
+					for (Entry<String, Pattern> e : commands.entrySet()) {
+						if (e.getValue().matcher(readLine).matches()) {
+							nc.send(handleCommand(currentEntityUser,
+									e.getKey(), e.getValue(), readLine));
 						}
-						for (Entry<String, Pattern> e : commands.entrySet()) {
-							if (e.getValue().matcher(readLine).matches()) {
-								nc.send(handleCommand(currentEntityUser,
-										e.getKey(), e.getValue(), readLine));
-							}
-						}
+					}
 
-					} while (readLine != null && !readLine.equals("quit"));
+				} while (readLine != null && !readLine.equals("quit"));
 
-				}
 			}
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
@@ -402,15 +387,16 @@ public class Server {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
-					sb.append("Record #\tPatient #\tPatient\tNurse #\tNurse\tDoctor #\tDoctor");
-					
-					
+					sb.append("Rec#\tPat#\tPatient\t\tNur#\tNurse\tDoc#\tDoctor\n");
+					sb.append("################################################################\n");
+
 					for (Record r : getReadableRecords(entity))
 						sb.append(String.format("%d\t%d\t%s\t%d\t%s\t%d\t%s\n",
-								r.getId(), r.getPatient().getId(),
-								r.getPatient().getName(), r.getNurse().getId(),
-								r.getNurse().getName(), r.getDoctor().getId(),
-								r.getDoctor().getName()));
+								r.getId(), r.getPatient().getId(), r
+										.getPatient().getName(), r.getNurse()
+										.getId(), r.getNurse().getName(), r
+										.getDoctor().getId(), r.getDoctor()
+										.getName()));
 
 					return sb.toString();
 				}
@@ -467,13 +453,21 @@ public class Server {
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
 
+					Matcher matcher = p.matcher(value);
+					boolean success = false;
 					for (Record r : records) {
-						if (r.getId() == Integer.parseInt(p.matcher(value)
-								.group(0))
+						if (matcher.matches()
+								&& r.getId() == Integer.parseInt(matcher
+										.group(1))
 								&& entity.canAccess(r,
 										EntityWithAccessControl.READ)) {
 							sb.append(r.toString());
+							success = true;
 						}
+					}
+					
+					if (!success) {
+						sb.append("Failed to read record");
 					}
 
 					return sb.toString();

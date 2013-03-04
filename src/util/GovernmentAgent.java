@@ -2,8 +2,8 @@ package util;
 
 public class GovernmentAgent extends Entity {
 
-	public GovernmentAgent(String id, Division division, String pass) {
-		super(id, division, pass);
+	public GovernmentAgent(String id, Division division) {
+		super(id, division);
 		this.myType = "GovernmentAgent";
 	}
 
