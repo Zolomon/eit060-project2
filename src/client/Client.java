@@ -40,7 +40,6 @@ public class Client {
 		FileInputStream stream = null;
 		String pass = null;
 		String name = null;
-		String id = null;
 
 		while (notFound) {
 			try {
@@ -49,8 +48,6 @@ public class Client {
 				name = scan.next();
 				System.out.print("Password: ");
 				pass = scan.next();
-				System.out.print("id: ");
-				id = scan.next();
 
 				stream = new FileInputStream("./certificates/" + name + "/"
 						+ name + ".jks");
@@ -94,10 +91,6 @@ public class Client {
 					fromServer);
 
 			nc.send(name);
-
-			nc.send(id);
-			System.out.println(nc.receive());
-			System.out.println(nc.receive());
 
 			// Parse welcome message
 			System.out.println("Welcome: " + nc.receive());
