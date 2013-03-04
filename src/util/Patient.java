@@ -4,8 +4,8 @@ public class Patient extends Entity {
 	private String data;
 	
 	
-	public Patient(String id, String data, Division division, String pass) {
-		super(id, division, pass);
+	public Patient(String id, String data, Division division) {
+		super(id, division);
 		this.data = data;
 		this.myType = "Patient";
 	}
