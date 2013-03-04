@@ -50,10 +50,10 @@ public class Client {
 						+ ".jks");
 				notFound = false;
 			} catch (FileNotFoundException e) {
-				notFound = true;	
+				notFound = true;
 				System.out.println("Wrong id or password, please try again");
 			}
-			
+
 		}
 
 		try {

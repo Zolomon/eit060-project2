@@ -109,8 +109,6 @@ public class Server {
 			// BufferedReader and -Writer are instantiated
 			// for transmitting and receiving data.
 			SSLSocket client;
-			// BufferedReader fromClient;
-			// BufferedWriter toClient;
 			String readLine = null;
 
 			commands = new HashMap<String, Pattern>();
@@ -144,8 +142,6 @@ public class Server {
 			commands.put("assign nurse",
 					Pattern.compile("assign nurse (\\d+) to patient (\\d+)"));
 
-			// try {
-
 			char[] passphrase = "password".toCharArray();
 
 			SSLContext ctx = SSLContext.getInstance("TLS");
@@ -173,7 +169,6 @@ public class Server {
 			while (true) {
 
 				client = (SSLSocket) ss.accept();
-				SSLSession session = client.getSession();
 				printSocketInfo(client);
 				System.out.println("Client connected ...");
 
@@ -184,17 +179,15 @@ public class Server {
 
 				NetworkCommunication nc = new NetworkCommunication(toClient,
 						fromClient);
-				
+
+				// id is set to the id which the user types in at the client
+				// side
 				String id = nc.receive();
-				
+
 				System.out.println("Client connected ...");
 
 				System.out.println("Logging in client ...");
 
-				// TODO: Login client
-				// loginClient(fromClient, toClient);
-
-				// TODO: Fix login, fetch real logged in entity
 				currentEntityUser = findEntity(id);
 
 				System.out.println(String.format("Welcome %s! %s",
@@ -230,7 +223,7 @@ public class Server {
 		}
 	}
 
-	// finds the correct entity. is not finished.
+	// Finds the correct entity.
 	private static Entity findEntity(String userName) {
 
 		for (int i = 0; i < docs.size(); i++) {
@@ -290,7 +283,7 @@ public class Server {
 		List<Patient> result = new ArrayList<Patient>();
 
 		for (Patient p : patients) {
-			if (entity.getDivision().getId().equals(p.getDivision().getId())) 
+			if (entity.getDivision().getId().equals(p.getDivision().getId()))
 				result.add(p);
 		}
 
@@ -395,11 +388,6 @@ public class Server {
 		System.out.println(String.format("Handling command [%s] for [#%d, %s]",
 				command, entity.getId(), entity.getName()));
 		return m.get(command).handleCommand(entity, p);
-	}
-
-	// EMPTY METHOD!
-	private void loginClient(BufferedReader fromClient,
-			DataOutputStream toClient) throws IOException {
 	}
 
 	/*
