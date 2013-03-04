@@ -1,24 +1,42 @@
 package server;
 
-import java.io.*;
-import java.net.*;
-import javax.net.ssl.*;
-import java.math.BigInteger;
-
-import java.security.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.security.AccessControlException;
+import java.security.InvalidParameterException;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import javax.security.cert.X509Certificate;
-import java.security.cert.CertificateException;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.TrustManagerFactory;
 
-import util.*;
-import util.logger.*;
+import util.Division;
+import util.Doctor;
+import util.Entity;
+import util.EntityWithAccessControl;
+import util.GovernmentAgent;
+import util.NetworkCommunication;
+import util.Nurse;
+import util.Patient;
+import util.Record;
+import util.logger.EntityAccessDeniedLogEvent;
+import util.logger.EntityAccessLogEvent;
+import util.logger.Log;
+import util.logger.LogEvent;
 
 public class Server {
 
@@ -180,8 +198,10 @@ public class Server {
 				NetworkCommunication nc = new NetworkCommunication(toClient,
 						fromClient);
 
+
 				// id is set to the id which the user types in at the client
 				// side
+
 				String id = nc.receive();
 
 				System.out.println("Client connected ...");
@@ -207,7 +227,7 @@ public class Server {
 					for (Entry<String, Pattern> e : commands.entrySet()) {
 						if (e.getValue().matcher(readLine).matches()) {
 							nc.send(handleCommand(currentEntityUser,
-									e.getKey(), e.getValue()));
+									e.getKey(), e.getValue(), readLine)); 
 						}
 					}
 
@@ -248,13 +268,8 @@ public class Server {
 		return null;
 	}
 
-	/*
-	 * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	 * >>>>>>>>>>>>>>>>
-	 */
-
 	public interface CommandHandler {
-		public String handleCommand(Entity entity, Pattern p);
+		public String handleCommand(Entity entity, Pattern p, String value); 
 	}
 
 	public List<Record> getReadableRecords(Entity entity) {
@@ -309,7 +324,7 @@ public class Server {
 			put("help", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p) {
+				public String handleCommand(Entity entity, Pattern p, String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
@@ -329,7 +344,7 @@ public class Server {
 			put("list records", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p) {
+				public String handleCommand(Entity entity, Pattern p, String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
@@ -345,7 +360,7 @@ public class Server {
 			put("list nurses", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p) {
+				public String handleCommand(Entity entity, Pattern p, String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
@@ -364,13 +379,13 @@ public class Server {
 			put("list patients", new CommandHandler() {
 
 				@Override
-				public String handleCommand(Entity entity, Pattern p) {
+				public String handleCommand(Entity entity, Pattern p, String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
 
-					sb.append("Patient #id\tName\tData\n");
-					sb.append("################################\n");
+					sb.append("Patient #id\tName\t\tData\n"); 	
+					sb.append("######################################\n");
 
 					for (Patient r : getPatientsForEntity(entity))
 						sb.append(String.format("%d\t\t%s\t%s\n", r.getId(),
@@ -380,14 +395,34 @@ public class Server {
 				}
 
 			});
+			
+			put("read record", new CommandHandler() {
+
+				@Override
+				public String handleCommand(Entity entity, Pattern p, String value) {
+					System.out.println(String.format("Handling [%s] ...",
+							p.pattern()));
+					StringBuilder sb = new StringBuilder();
+
+					for (Record r : records) {
+						if (r.getId() == Integer.parseInt(p.matcher(value).group(0)) && 
+								entity.canAccess(r, EntityWithAccessControl.READ)) {
+							sb.append(r.toString());
+						}
+					}
+					
+					return sb.toString();
+				}
+
+			});
 		}
 	};
 	private HashMap<String, Pattern> commands;
 
-	private String handleCommand(Entity entity, String command, Pattern p) {
+	private String handleCommand(Entity entity, String command, Pattern p, String value) {
 		System.out.println(String.format("Handling command [%s] for [#%d, %s]",
 				command, entity.getId(), entity.getName()));
-		return m.get(command).handleCommand(entity, p);
+		return m.get(command).handleCommand(entity, p, value);
 	}
 
 	/*
