@@ -184,7 +184,9 @@ public class Server {
 
 				NetworkCommunication nc = new NetworkCommunication(toClient,
 						fromClient);
-
+				
+				String id = nc.receive();
+				
 				System.out.println("Client connected ...");
 
 				System.out.println("Logging in client ...");
@@ -193,7 +195,7 @@ public class Server {
 				// loginClient(fromClient, toClient);
 
 				// TODO: Fix login, fetch real logged in entity
-				currentEntityUser = docs.get(0);
+				currentEntityUser = findEntity(id);
 
 				System.out.println(String.format("Welcome %s! %s",
 						currentEntityUser.getName(), currentEntityUser
