@@ -23,7 +23,7 @@ public class Client {
 	private static final int PORT = 5678;
 
 	public static void main(String[] args) {
-		
+
 		System.setProperty("javax.net.ssl.trustStore",
 				"./certificates/CA/truststore");
 
@@ -38,9 +38,7 @@ public class Client {
 		String id = scan.next();
 		System.out.print("Password: ");
 		String pass = scan.next();
-		
-		
-		//StringBuffer
+
 		try {
 			char[] passphrase = pass.toCharArray();
 
@@ -49,88 +47,55 @@ public class Client {
 			ks = KeyStore.getInstance("JKS");
 			tmf = TrustManagerFactory.getInstance("SunX509");
 
-			ks.load(new FileInputStream(
-					"./certificates/"
-							+ id + "/" + id + ".jks"), passphrase);
-			
-			
+			ks.load(new FileInputStream("./certificates/" + id + "/" + id
+					+ ".jks"), passphrase);
 
 			kmf.init(ks, passphrase);
 			tmf.init(ks);
 			ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
 			factory = ctx.getSocketFactory();
-			
-			
-			SSLSocket client = (SSLSocket) factory.createSocket("localhost", PORT);
+
+			SSLSocket client = (SSLSocket) factory.createSocket("localhost",
+					PORT);
 
 			client.setUseClientMode(true);
 			client.startHandshake();
 			System.out.println(client);
-			
-			
-			PrintWriter toServer = new PrintWriter(new OutputStreamWriter(client.getOutputStream()), true);
-			BufferedReader fromServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
-			
-			NetworkCommunication nc = new NetworkCommunication(toServer, fromServer);
-			
+
+			PrintWriter toServer = new PrintWriter(new OutputStreamWriter(
+					client.getOutputStream()), true);
+			BufferedReader fromServer = new BufferedReader(
+					new InputStreamReader(client.getInputStream()));
+
+			NetworkCommunication nc = new NetworkCommunication(toServer,
+					fromServer);
+
 			// Parse welcome message
 			System.out.println("Welcome: " + nc.receive());
-			
+
 			Scanner sc = new Scanner(System.in);
-						
+
 			// http://en.wikipedia.org/wiki/REPL
 			String response = null;
 			String userInput = null;
 			do {
 				System.out.print("Enter command: ");
-				
+
 				// Read - input from client -> server
 				userInput = sc.nextLine();
 				System.out.println("Input: " + userInput);
 				nc.send(userInput);
-				
+
 				// Eval - output form server -> client
 				response = nc.receive();
 				System.out.println("Read Server: " + response);
-				
+
 				// Print - print result
-				//System.out.println("Handled: " + response);
-				
+				// System.out.println("Handled: " + response);
+
 				// Loop - repeat!
 			} while (response != null);
-	
-			
-			/*
-			while ((fromServer = in.readLine()) != null) {
-			    		System.out.println("Server: " + fromServer);
-			
-			    Scanner sc1 = new Scanner(System.in);
-			    fromUser = sc1.next();
-			    if (fromUser != null) {
-			        System.out.println("Client: " + fromUser);
-			        out.println(fromUser);
-			    }
-			}
-			*/
-			
-//			 OutputStreamWriter outputstreamwriter = new OutputStreamWriter(client.getOutputStream());
-//	         toServer = new BufferedWriter(outputstreamwriter);
-	            
-//			fromServer = new BufferedReader(new InputStreamReader(
-//					System.in));
-//			
-//			
-//			String serverOutput;
-//			String clientInput;
-//			
-//			System.out.println("Write hello");
-//			while((serverOutput = in.readLine())!= null){
-//				in.read(in);
-//				out.flush();
-			
-			
-			
 
 		} catch (UnknownHostException e) {
 			System.out.println("2");

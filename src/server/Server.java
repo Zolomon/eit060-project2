@@ -9,6 +9,7 @@ import java.security.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -112,8 +113,7 @@ public class Server {
 			// BufferedWriter toClient;
 			String readLine = null;
 
-			// Creating hashmap to store all of the commands
-			HashMap<String, Pattern> commands = new HashMap<String, Pattern>();
+			commands = new HashMap<String, Pattern>();
 
 			/*
 			 * Commands:
@@ -129,20 +129,20 @@ public class Server {
 			 * "Government Agent": delete [record_id]
 			 */
 
+			commands.put("help", Pattern.compile("help"));
 			commands.put("list records", Pattern.compile("list records"));
 			commands.put("list nurses", Pattern.compile("list nurses"));
 			commands.put("list patients", Pattern.compile("list patients"));
-			// commands.put("read record",
-			// Pattern.compile("read record (?<recordid>\\d+)"));
-			// commands.put("write record",
-			// Pattern.compile("write record (?<recordid>\\d+) (?<data>).*"));
-			// commands.put("delete record",
-			// Pattern.compile("delete record (?<recordid>\\d+)"));
-			// commands.put(
-			// "create record",
-			// Pattern.compile("create record (?<patientid>\\d+) (?<nurseid>\\d+) (?<data>).*"));
-			// commands.put("assign nurse", Pattern
-			// .compile("assign (?<nurseid>\\d+) to (?<patientid>\\d+)"));
+			commands.put("read record", Pattern.compile("read record (\\d+)"));
+			commands.put("write record", Pattern
+					.compile("write record (\\d+) (.*)"));
+			commands.put("delete record",
+					Pattern.compile("delete record (\\d+)"));
+			commands.put(
+					"create record",
+					Pattern.compile("create record for patient (\\d+) with nurse (\\d+) and data (.*)"));
+			commands.put("assign nurse", Pattern
+					.compile("assign nurse (\\d+) to patient (\\d+)"));
 
 			// try {
 
@@ -182,9 +182,9 @@ public class Server {
 				BufferedReader fromClient = new BufferedReader(
 						new InputStreamReader(client.getInputStream()));
 
-				NetworkCommunication nc = new NetworkCommunication(toClient, fromClient);
-				
-				
+				NetworkCommunication nc = new NetworkCommunication(toClient,
+						fromClient);
+
 				System.out.println("Client connected ...");
 
 				System.out.println("Logging in client ...");
@@ -193,16 +193,14 @@ public class Server {
 				// loginClient(fromClient, toClient);
 
 				// TODO: Fix login, fetch real logged in entity
-				currentEntityUser = patients.get(0);
+				currentEntityUser = docs.get(0);
 
 				System.out.println(String.format("Welcome %s! %s",
 						currentEntityUser.getName(), currentEntityUser
 								.getClass().getName()));
 
-				
-				nc.send(String.format("Welcome %s! %s",
-						currentEntityUser.getName(), currentEntityUser
-								.getClass().getName()));
+				nc.send(String.format("Welcome %s! %s", currentEntityUser
+						.getName(), currentEntityUser.getClass().getName()));
 
 				do {
 					readLine = nc.receive();
@@ -249,9 +247,9 @@ public class Server {
 			}
 		}
 
-		if (agent.getName().equals(userName)) 
+		if (agent.getName().equals(userName))
 			return agent;
-		
+
 		return null;
 	}
 
@@ -278,12 +276,30 @@ public class Server {
 	@SuppressWarnings("serial")
 	HashMap<String, CommandHandler> m = new HashMap<String, CommandHandler>() {
 		{
+			put("help", new CommandHandler() {
+
+				@Override
+				public String handleCommand(EntityWithAccessControl entity,
+						Pattern p) {
+					System.out.println(String.format("Handling [%s] ...", p.pattern()));
+					StringBuilder sb = new StringBuilder();
+
+					sb.append("Command: \t\t\tFormat:\n");
+					
+					for (Map.Entry<String, Pattern> command : commands.entrySet())
+						sb.append(String.format("%s\t\t\t%s\n", command.getKey(), command.getValue().pattern()));
+
+					return sb.toString();
+				}
+
+			});
+			
 			put("list records", new CommandHandler() {
 
 				@Override
 				public String handleCommand(EntityWithAccessControl entity,
 						Pattern p) {
-					System.out.println("Handling list records ...");
+					System.out.println(String.format("Handling [%s] ...", p.pattern()));
 					StringBuilder sb = new StringBuilder();
 
 					for (Record r : getReadableRecords(entity))
@@ -295,6 +311,7 @@ public class Server {
 			});
 		}
 	};
+	private HashMap<String, Pattern> commands;
 
 	private String handleCommand(Entity entity, String command, Pattern p) {
 		System.out.println(String.format("Handling command [%s] for [#%d, %s]",
