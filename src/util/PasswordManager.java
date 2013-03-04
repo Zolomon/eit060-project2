@@ -72,7 +72,7 @@ public class PasswordManager {
 		// FIXME: FATAL ERROR
 	}
 	
-	public boolean checkPassword(String username, String hash) {
+	public boolean checkPassword(String username, byte[] hash) {
 		return passwords.get(username).getHash().equals(hash);
 	}
 	
