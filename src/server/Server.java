@@ -187,6 +187,8 @@ public class Server {
 			ss.setNeedClientAuth(true);
 
 			System.out.println("Running server ...");
+			log.updateLog(new LogEvent(Log.LVL_INFO, "Server",
+					"Server is running"));
 			System.out.println(ss);
 			System.out.println("Server is listening on port " + PORT);
 
@@ -195,6 +197,9 @@ public class Server {
 				client = (SSLSocket) ss.accept();
 				printSocketInfo(client);
 				System.out.println("Client connected ...");
+
+				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
+						"A client has connected to the server"));
 
 				PrintWriter toClient = new PrintWriter(new PrintWriter(
 						client.getOutputStream()));
@@ -208,7 +213,11 @@ public class Server {
 				// side
 
 				String name = nc.receive();
+				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
+						"name has been received from client"));
 				String pass = nc.receive();
+				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
+						"pass has been received from client"));
 
 				System.out.println("Client connected ...");
 
@@ -221,23 +230,32 @@ public class Server {
 					System.out
 							.println("id doesn't match. Shuting down system...");
 					nc.send("id doesnt match. Shouting down system...");
+					log.updateLog(new LogEvent(Log.LVL_WARNING, "Client",
+							"Client's pass doesn't match entity's"));
 				} else {
 					nc.send("Success!");
-
+					log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
+							"Client's pass match its entity"));
 					System.out.println(String.format("Welcome %s! %s",
 							currentEntityUser.getName(), currentEntityUser
 									.getClass().getName()));
 
 					nc.send(String.format("Welcome %s! %s", currentEntityUser
 							.getName(), currentEntityUser.getClass().getName()));
+					log.updateLog(new LogEvent(Log.LVL_INFO, "Server",
+							"Welcome has been sent"));
 
 					do {
 						readLine = nc.receive();
+						log.updateLog(new LogEvent(Log.LVL_INFO, "Client info",
+								readLine));
 						System.out.println("read: " + readLine);
 
-						if (readLine == null)
+						if (readLine == null) {
+							log.updateLog(new LogEvent(Log.LVL_INFO,
+									"Client info", "readLine was null"));
 							break;
-
+						}
 						for (Entry<String, Pattern> e : commands.entrySet()) {
 							if (e.getValue().matcher(readLine).matches()) {
 								nc.send(handleCommand(currentEntityUser,
@@ -255,6 +273,7 @@ public class Server {
 					.toString()));
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.updateLog(new LogEvent(Log.LVL_ERROR, "Exception", e.toString()));
 		}
 	}
 
@@ -472,7 +491,7 @@ public class Server {
 		// Checks if all entities are in the same division
 		if (patient.getDivision() != nurse.getDivision()
 				&& nurse.getDivision() != doctor.getDivision()) {
-			// logs the false case. Should message be included?
+			// logs in false case
 			log.updateLog(new LogEvent(
 					Log.LVL_ERROR,
 					"RUNTIME ERROR",
@@ -490,7 +509,7 @@ public class Server {
 		// If they are create new medical journal
 		Record record = new Record(patient, doctor, nurse, patient.getData());
 
-		// log update in true case.
+		// logs in true case
 		log.updateLog(new EntityAccessLogEvent(doctor, record,
 				EntityWithAccessControl.EXECUTE));
 
