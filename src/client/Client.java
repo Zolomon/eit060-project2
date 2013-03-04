@@ -33,11 +33,28 @@ public class Client {
 		KeyStore ks = null;
 		TrustManagerFactory tmf = null;
 
-		Scanner scan = new Scanner(System.in);
-		System.out.print("Namn: ");
-		String id = scan.next();
-		System.out.print("Password: ");
-		String pass = scan.next();
+		boolean notFound = true;
+		FileInputStream stream = null;
+		String pass = null;
+		String id = null;
+
+		while (notFound) {
+			try {
+				Scanner scan = new Scanner(System.in);
+				System.out.print("Namn: ");
+				id = scan.next();
+				System.out.print("Password: ");
+				pass = scan.next();
+
+				stream = new FileInputStream("./certificates/" + id + "/" + id
+						+ ".jks");
+				notFound = false;
+			} catch (FileNotFoundException e) {
+				notFound = true;	
+				System.out.println("Wrong id or password, please try again");
+			}
+			
+		}
 
 		try {
 			char[] passphrase = pass.toCharArray();
@@ -47,8 +64,7 @@ public class Client {
 			ks = KeyStore.getInstance("JKS");
 			tmf = TrustManagerFactory.getInstance("SunX509");
 
-			ks.load(new FileInputStream("./certificates/" + id + "/" + id
-					+ ".jks"), passphrase);
+			ks.load(stream, passphrase);
 
 			kmf.init(ks, passphrase);
 			tmf.init(ks);
@@ -70,6 +86,8 @@ public class Client {
 
 			NetworkCommunication nc = new NetworkCommunication(toServer,
 					fromServer);
+
+			nc.send(id);
 
 			// Parse welcome message
 			System.out.println("Welcome: " + nc.receive());
@@ -99,10 +117,8 @@ public class Client {
 			} while (response != null);
 
 		} catch (UnknownHostException e) {
-			System.out.println("2");
 			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("3");
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block

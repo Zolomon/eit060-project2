@@ -1,24 +1,42 @@
 package server;
 
-import java.io.*;
-import java.net.*;
-import javax.net.ssl.*;
-import java.math.BigInteger;
-
-import java.security.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.security.AccessControlException;
+import java.security.InvalidParameterException;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import javax.security.cert.X509Certificate;
-import java.security.cert.CertificateException;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.TrustManagerFactory;
 
-import util.*;
-import util.logger.*;
+import util.Division;
+import util.Doctor;
+import util.Entity;
+import util.EntityWithAccessControl;
+import util.GovernmentAgent;
+import util.NetworkCommunication;
+import util.Nurse;
+import util.Patient;
+import util.Record;
+import util.logger.EntityAccessDeniedLogEvent;
+import util.logger.EntityAccessLogEvent;
+import util.logger.Log;
+import util.logger.LogEvent;
 
 public class Server {
 
@@ -185,6 +203,8 @@ public class Server {
 				NetworkCommunication nc = new NetworkCommunication(toClient,
 						fromClient);
 
+				String id = nc.receive();
+
 				System.out.println("Client connected ...");
 
 				System.out.println("Logging in client ...");
@@ -193,7 +213,7 @@ public class Server {
 				// loginClient(fromClient, toClient);
 
 				// TODO: Fix login, fetch real logged in entity
-				currentEntityUser = docs.get(0);
+				currentEntityUser = findEntity(id);
 
 				System.out.println(String.format("Welcome %s! %s",
 						currentEntityUser.getName(), currentEntityUser
@@ -212,7 +232,7 @@ public class Server {
 					for (Entry<String, Pattern> e : commands.entrySet()) {
 						if (e.getValue().matcher(readLine).matches()) {
 							nc.send(handleCommand(currentEntityUser,
-									e.getKey(), e.getValue(), readLine));
+									e.getKey(), e.getValue(), readLine)); 
 						}
 					}
 
@@ -254,7 +274,7 @@ public class Server {
 	}
 
 	public interface CommandHandler {
-		public String handleCommand(Entity entity, Pattern p, String value);
+		public String handleCommand(Entity entity, Pattern p, String value); 
 	}
 
 	public List<Record> getReadableRecords(Entity entity) {
@@ -283,7 +303,7 @@ public class Server {
 		List<Patient> result = new ArrayList<Patient>();
 
 		for (Patient p : patients) {
-			if (entity.getDivision().getId().equals(p.getDivision().getId())) 
+			if (entity.getDivision().getId().equals(p.getDivision().getId()))
 				result.add(p);
 		}
 
@@ -293,7 +313,7 @@ public class Server {
 	@SuppressWarnings("serial")
 	HashMap<String, CommandHandler> m = new HashMap<String, CommandHandler>() {
 		{
-			//// commands.put("list patients", Pattern.compile("list patients"));
+			// commands.put("list patients", Pattern.compile("list patients"));
 			// commands.put("read record",
 			// Pattern.compile("read record (\\d+)"));
 			// commands.put("write record",
@@ -369,7 +389,7 @@ public class Server {
 							p.pattern()));
 					StringBuilder sb = new StringBuilder();
 
-					sb.append("Patient #id\tName\t\tData\n");
+					sb.append("Patient #id\tName\t\tData\n"); 	
 					sb.append("######################################\n");
 
 					for (Patient r : getPatientsForEntity(entity))
@@ -400,8 +420,6 @@ public class Server {
 				}
 
 			});
-			
-			
 		}
 	};
 	private HashMap<String, Pattern> commands;
