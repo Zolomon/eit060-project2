@@ -16,6 +16,8 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
+import util.NetworkCommunication;
+
 public class Client {
 
 	private static final int PORT = 5678;
@@ -67,33 +69,33 @@ public class Client {
 			System.out.println(client);
 			
 			
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(client.getOutputStream()), true);
-			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+			PrintWriter toServer = new PrintWriter(new OutputStreamWriter(client.getOutputStream()), true);
+			BufferedReader fromServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
+			
+			NetworkCommunication nc = new NetworkCommunication(toServer, fromServer);
 			
 			// Parse welcome message
-			System.out.println("Welcome: " + in.readLine());
+			System.out.println("Welcome: " + nc.receive());
 			
 			Scanner sc = new Scanner(System.in);
 						
 			// http://en.wikipedia.org/wiki/REPL
 			String response = null;
-			String input = null;
+			String userInput = null;
 			do {
 				System.out.print("Enter command: ");
 				
 				// Read - input from client -> server
-				input = sc.nextLine();
-				System.out.println("Input: " + input);
-				out.write(input + "\n");
-				out.flush();
+				userInput = sc.nextLine();
+				System.out.println("Input: " + userInput);
+				nc.send(userInput);
 				
 				// Eval - output form server -> client
-				System.out.print("Reading: ");
-				System.out.println();
-				response = in.readLine();
+				response = nc.receive();
+				System.out.println("Read Server: " + response);
 				
 				// Print - print result
-				System.out.println("From Server: " + response);
+				//System.out.println("Handled: " + response);
 				
 				// Loop - repeat!
 			} while (response != null);

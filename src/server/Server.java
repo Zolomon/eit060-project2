@@ -182,43 +182,43 @@ public class Server {
 				BufferedReader fromClient = new BufferedReader(
 						new InputStreamReader(client.getInputStream()));
 
+				NetworkCommunication nc = new NetworkCommunication(toClient, fromClient);
+				
+				
 				System.out.println("Client connected ...");
-				
+
 				System.out.println("Logging in client ...");
-				
+
 				// TODO: Login client
-				//loginClient(fromClient, toClient);
+				// loginClient(fromClient, toClient);
 
 				// TODO: Fix login, fetch real logged in entity
 				currentEntityUser = patients.get(0);
 
-				System.out.println(String.format("Welcome %s! %s\n",
-				 currentEntityUser.getName(), currentEntityUser
-				 .getClass().getName()));
-				
-				 toClient.write(String.format("Welcome %s! %s\n",
-				 currentEntityUser.getName(), currentEntityUser
-				 .getClass().getName()));
-				 toClient.flush();
+				System.out.println(String.format("Welcome %s! %s",
+						currentEntityUser.getName(), currentEntityUser
+								.getClass().getName()));
 
+				
+				nc.send(String.format("Welcome %s! %s",
+						currentEntityUser.getName(), currentEntityUser
+								.getClass().getName()));
 
 				do {
-					readLine = fromClient.readLine();
+					readLine = nc.receive();
+					System.out.println("read: " + readLine);
+
+					if (readLine == null)
+						break;
 
 					for (Entry<String, Pattern> e : commands.entrySet()) {
 						if (e.getValue().matcher(readLine).matches()) {
-							toClient.write(handleCommand(currentEntityUser,
+							nc.send(handleCommand(currentEntityUser,
 									e.getKey(), e.getValue()));
 						}
 					}
-				} while (readLine != null && !readLine.equals("quit"));
 
-				// Check username
-				// trying to get the name of the "client"
-				// X509Certificate cert = (X509Certificate)session
-				// getPeerCertificateChain()[0];
-				// String subject = cert.getSubjectDN().getName();
-				// System.out.println (subject);
+				} while (readLine != null && !readLine.equals("quit"));
 
 			}
 		} catch (IOException e) {
@@ -226,124 +226,8 @@ public class Server {
 			log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
 					.toString()));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	// try {
-
-	// outputLine = processInput(null);
-	// out.println(outputLine);
-
-	// while ((clientOutput = in.readLine()) != null) {
-	// clientOutput = processInput(serverInput);
-	// out.println(clientOutput);
-	// if (clientOutput.equals("exit"))
-	// break;
-	// }
-
-	// fromClient = new BufferedReader(new InputStreamReader(
-	// client.getInputStream()));
-	//
-	//
-	// OutputStreamWriter outputstreamwriter = new
-	// OutputStreamWriter(client.getOutputStream());
-	// serverInput = new BufferedWriter(outputstreamwriter);
-	//
-	// System.out.println("Waiting for commands...");
-	// String fromClient = null;
-	//
-	// do {
-	// fromClient = in.readLine();
-	// System.out.println("Received: " + fromClient);
-	// out.write("Server received: " + fromClient + "\n");
-	// out.flush();
-	// } while (fromClient != null);
-	//
-	// while ((fromClient = in.readLine()) != null) {
-	// System.out.println("Received: " + fromClient);
-	// out.write("Server received: " + fromClient);
-	// out.flush();
-	// //out.println(fromClient);
-	// //fromClient = in.readLine();
-	// //out.write(fromClient, 0, fromClient.length());
-	// //out.println();
-	// //out.flush();
-	// }
-
-	// out.writeBytes("Enter your command: ");
-	// toClient.flush();
-	//
-	// readLine = fromClient.readLine();
-	// while (readLine != null && !readLine.equals("quit")) {
-	//
-	// // loginClient(fromClient, toClient);
-	//
-	// // TODO: Fix login, fetch real logged in entity
-	//
-	// toClient.writeBytes("Enter your command: ");
-	// toClient.flush();
-	// readLine = fromClient.readLine();
-	//
-	// for (Entry<String, Pattern> e : commands.entrySet()) {
-	// if (e.getValue().matcher(readLine).matches()) {
-	// toClient.writeChars(handleCommand(currentEntityUser,
-	// e.getKey(), e.getValue()));
-	// }
-	// }
-	//
-	// // } while (readLine != null && !readLine.equals("quit"));
-	//
-	// // Check username
-	//
-	// }
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// System.out.println("The problem lays here");
-	// }
-
-	// } catch (IOException e) {
-	// System.out.println("Class Server died: " + e.getMessage());
-	// e.printStackTrace();
-	// log.updateLog(new LogEvent(Log.LVL_ERROR, "IOException", e
-	// .toString()));
-	// } catch (NoSuchAlgorithmException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// } catch (KeyStoreException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// } catch (CertificateException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// } catch (KeyManagementException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// } catch (UnrecoverableKeyException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// }
-
-	/*
-	 * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	 * >>>>>>>>>>>>>>>>
-	 */
-
-	// handled commmunication between client and serve. is not finished and
-	// needs to be more generic
-	private static String processInput(String input) {
-		String output = null;
-
-		if (input == null) {
-			output = "Your name is: ";
-		}
-		if (input.equals("doctor00")) {
-			currentEntityUser = findEntity("doctor00");
-		}
-
-		return output;
 	}
 
 	// finds the correct entity. is not finished.
@@ -365,6 +249,9 @@ public class Server {
 			}
 		}
 
+		if (agent.getName().equals(userName)) 
+			return agent;
+		
 		return null;
 	}
 
@@ -396,6 +283,7 @@ public class Server {
 				@Override
 				public String handleCommand(EntityWithAccessControl entity,
 						Pattern p) {
+					System.out.println("Handling list records ...");
 					StringBuilder sb = new StringBuilder();
 
 					for (Record r : getReadableRecords(entity))
