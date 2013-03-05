@@ -357,19 +357,6 @@ public class Server {
 	@SuppressWarnings("serial")
 	HashMap<String, CommandHandler> m = new HashMap<String, CommandHandler>() {
 		{
-			// commands.put("list patients", Pattern.compile("list patients"));
-			// commands.put("read record",
-			// Pattern.compile("read record (\\d+)"));
-			// commands.put("write record",
-			// Pattern.compile("write record (\\d+) (.*)"));
-			// commands.put("delete record",
-			// Pattern.compile("delete record (\\d+)"));
-			// commands.put(
-			// "create record",
-			// Pattern.compile("create record for patient (\\d+) with nurse (\\d+) and data (.*)"));
-			// commands.put("assign nurse",
-			// Pattern.compile("assign nurse (\\d+) to patient (\\d+)"));
-
 			put("help", new CommandHandler() {
 
 				@Override
@@ -540,7 +527,6 @@ public class Server {
 			});
 
 			put("create record", new CommandHandler() {
-				// "create record for patient (\\d+) with nurse (\\d+) and data (.*)"
 				@Override
 				public String handleCommand(Entity entity, Pattern p,
 						String value) {
@@ -559,9 +545,11 @@ public class Server {
 							}
 
 							if (currentEntityUser.getType() != EntityType.Doctor)
-								throw new AccessControlException("Current user is not allowed to create records");
-							
-							Record r = createJournal(pat, (Doctor)currentEntityUser, n);
+								throw new AccessControlException(
+										"Current user is not allowed to create records");
+
+							Record r = createJournal(pat,
+									(Doctor) currentEntityUser, n);
 
 							if (currentEntityUser.canAccess(r,
 									EntityWithAccessControl.EXECUTE)) {
@@ -570,15 +558,53 @@ public class Server {
 						}
 					} catch (AccessControlException e) {
 						return "Access Denied";
-					} 
-					catch (ClassCastException e) {
+					} catch (ClassCastException e) {
 						return "Invalid parameters";
-					}
-					catch (InvalidParameterException e) {
+					} catch (InvalidParameterException e) {
 						return "Invalid parameters";
 					}
 
 					return "Created record";
+				}
+			});
+
+			put("assign nurse", new CommandHandler() {
+				@Override
+				public String handleCommand(Entity entity, Pattern p,
+						String value) {
+					System.out.println(String.format("Handling [%s] ...",
+							p.pattern()));
+
+					Matcher m = p.matcher(value);
+
+					try {
+						if (m.matches()) {
+							Nurse n = (Nurse) findEntity(m.group(1));
+							Patient pat = (Patient) findEntity(m.group(2));
+
+							if (pat == null || n == null) {
+								throw new InvalidParameterException();
+							}
+
+							if (currentEntityUser.getType() != EntityType.Doctor)
+								throw new AccessControlException(
+										"Current user is not allowed to assign nurses");
+
+							for (Record r : records) {
+								if (r.getPatient().getId() == pat.getId()) {
+									r.setNurse((Doctor) currentEntityUser, n);
+								}
+							}
+						}
+					} catch (AccessControlException e) {
+						return "Access Denied";
+					} catch (ClassCastException e) {
+						return "Invalid parameters";
+					} catch (InvalidParameterException e) {
+						return "Invalid parameters";
+					}
+
+					return "Assigned nurse";
 				}
 			});
 

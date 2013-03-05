@@ -2,7 +2,6 @@ package util;
 
 import java.security.AccessControlException;
 
-
 public class Record {
 
 	private Patient patient;
@@ -80,5 +79,12 @@ public class Record {
 						this.patient.getName(), this.nurse.getId(),
 						this.nurse.getName(), this.doctor.getId(),
 						this.doctor.getName(), this.data);
+	}
+
+	public void setNurse(Doctor doctor, Nurse nurse) {
+		// FIXME: Log that doctor did this
+		if (doctor.canAccess(this, EntityWithAccessControl.EXECUTE)) {
+			this.nurse = nurse;
+		}
 	}
 }
