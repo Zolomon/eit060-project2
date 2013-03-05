@@ -225,12 +225,13 @@ public class Server {
 				NetworkCommunication nc = new NetworkCommunication(toClient,
 						fromClient);
 
-				// id is set to the id which the user types in at the client
-				// side
-
 				String name = nc.receive();
-				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
-						"name has been received from client"));
+				// byte[] userSalt = pwMn.getSalt(name);
+				//
+				// nc.sendByteArray(userSalt);
+				//
+				// log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
+				// "name has been received from client"));
 
 				System.out.println("Client connected ...");
 
@@ -268,6 +269,7 @@ public class Server {
 							nc.send(handleCommand(currentEntityUser,
 									e.getKey(), e.getValue(), readLine));
 							parsedCmd = true;
+
 						}
 					}
 
@@ -466,7 +468,6 @@ public class Server {
 								sb.append(r.toString());
 							}
 						}
-
 					} catch (AccessControlException e) {
 						return "Access Denied";
 					}

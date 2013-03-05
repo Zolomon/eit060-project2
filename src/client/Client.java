@@ -25,7 +25,6 @@ public class Client {
 
 	public static void main(String[] args) {
 
-		PasswordManager pwMn = new PasswordManager();
 
 		System.setProperty("javax.net.ssl.trustStore",
 				"./certificates/CA/truststore");
@@ -46,7 +45,7 @@ public class Client {
 				Scanner scan = new Scanner(System.in);
 				System.out.print("Namn: ");
 				name = scan.next();
-				System.out.print("Password: ");
+				System.out.print("Password for cert: ");
 				pass = scan.next();
 
 				stream = new FileInputStream("./certificates/" + name + "/"
