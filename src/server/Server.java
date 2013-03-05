@@ -226,12 +226,12 @@ public class Server {
 						fromClient);
 
 				String name = nc.receive();
-				// byte[] userSalt = pwMn.getSalt(name);
-				//
-				// nc.sendByteArray(userSalt);
-				//
-				// log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
-				// "name has been received from client"));
+//				byte[] userSalt = pwMn.getSalt(name);
+//				
+//				nc.sendByteArray(userSalt);
+//				
+//				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
+//						"name has been received from client"));
 
 				System.out.println("Client connected ...");
 
