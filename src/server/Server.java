@@ -238,7 +238,7 @@ public class Server {
 				currentEntityUser = findEntity(name);
 
 				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
-						"Client's pass match its entity"));
+						"Client password match its entity"));
 				System.out.println(String.format("Welcome %s! %s",
 						currentEntityUser.getName(), currentEntityUser
 								.getClass().getName()));
@@ -259,11 +259,19 @@ public class Server {
 								"readLine was null"));
 						break;
 					}
+
+					boolean parsedCmd = false;
+					
 					for (Entry<String, Pattern> e : commands.entrySet()) {
 						if (e.getValue().matcher(readLine).matches()) {
 							nc.send(handleCommand(currentEntityUser,
 									e.getKey(), e.getValue(), readLine));
+							parsedCmd = true;
 						}
+					}
+					
+					if (!parsedCmd) {
+						nc.send("Unrecognized command. \nUse 'help' for a list of available commands.");
 					}
 
 				} while (readLine != null && !readLine.equals("quit"));
@@ -391,12 +399,15 @@ public class Server {
 					sb.append("################################################################\n");
 
 					for (Record r : getReadableRecords(entity))
-						sb.append(String.format("%d\t%d\t%s\t%d\t%s\t%d\t%s\n",
-								r.getId(), r.getPatient().getId(), r
-										.getPatient().getName(), r.getNurse()
-										.getId(), r.getNurse().getName(), r
-										.getDoctor().getId(), r.getDoctor()
-										.getName()));
+						if (!r.toDelete()) {
+							sb.append(String.format(
+									"%d\t%d\t%s\t%d\t%s\t%d\t%s\n", r.getId(),
+									r.getPatient().getId(), r.getPatient()
+											.getName(), r.getNurse().getId(), r
+											.getNurse().getName(), r
+											.getDoctor().getId(), r.getDoctor()
+											.getName()));
+						}
 
 					return sb.toString();
 				}
@@ -454,20 +465,19 @@ public class Server {
 					StringBuilder sb = new StringBuilder();
 
 					Matcher matcher = p.matcher(value);
-					boolean success = false;
-					for (Record r : records) {
-						if (matcher.matches()
-								&& r.getId() == Integer.parseInt(matcher
-										.group(1))
-								&& entity.canAccess(r,
-										EntityWithAccessControl.READ)) {
-							sb.append(r.toString());
-							success = true;
+					try {
+						for (Record r : records) {
+							if (matcher.matches()
+									&& r.getId() == Integer.parseInt(matcher
+											.group(1))
+									&& entity.canAccess(r,
+											EntityWithAccessControl.READ)) {
+								sb.append(r.toString());
+							}
 						}
-					}
-					
-					if (!success) {
-						sb.append("Failed to read record");
+
+					} catch (AccessControlException e) {
+						return "Access Denied";
 					}
 
 					return sb.toString();
@@ -483,12 +493,49 @@ public class Server {
 						String value) {
 					System.out.println(String.format("Handling [%s] ...",
 							p.pattern()));
-					StringBuilder sb = new StringBuilder();
 
-					return null;
+					Matcher m = p.matcher(value);
+
+					try {
+						for (Record r : records) {
+							if (m.matches()
+									&& r.getId() == Integer.parseInt(m.group(1))) {
+								r.writeData(entity, m.group(2));
+							}
+						}
+					} catch (AccessControlException e) {
+						return "Access Denied";
+					}
+
+					return "Wrote to record";
 				}
-
 			});
+
+			put("delete record", new CommandHandler() {
+
+				@Override
+				public String handleCommand(Entity entity, Pattern p,
+						String value) {
+					System.out.println(String.format("Handling [%s] ...",
+							p.pattern()));
+
+					Matcher m = p.matcher(value);
+
+					try {
+						for (Record r : records) {
+							if (m.matches()
+									&& r.getId() == Integer.parseInt(m.group(1))) {
+								r.delete(entity);
+							}
+						}
+					} catch (AccessControlException e) {
+						return "Access Denied";
+					}
+
+					return "Deleted record";
+				}
+			});
+
 		}
 	};
 	private HashMap<String, Pattern> commands;
