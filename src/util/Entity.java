@@ -27,7 +27,7 @@ public abstract class Entity implements EntityWithAccessControl {
 		return division;
 	}
 
-	public String getType() {
-		return myType;
+	public EntityType getType() {
+		return EntityType.Doctor;
 	}
 }

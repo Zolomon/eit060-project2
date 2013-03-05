@@ -26,7 +26,7 @@ public class EntityAccessLogEvent extends LogEvent {
 				"Entity Accessed Record",
 				String.format(
 						"%s #%d %s Record #%d",
-						entity.getType(),
+						entity.getType().name(),
 						entity.getId(),
 						accessRight == EntityWithAccessControl.READ ? "read"
 								: accessRight == EntityWithAccessControl.WRITE ? "wrote to"

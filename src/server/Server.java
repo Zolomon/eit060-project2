@@ -28,6 +28,7 @@ import javax.net.ssl.TrustManagerFactory;
 import util.Division;
 import util.Doctor;
 import util.Entity;
+import util.EntityType;
 import util.EntityWithAccessControl;
 import util.GovernmentAgent;
 import util.NetworkCommunication;
@@ -261,7 +262,7 @@ public class Server {
 					}
 
 					boolean parsedCmd = false;
-					
+
 					for (Entry<String, Pattern> e : commands.entrySet()) {
 						if (e.getValue().matcher(readLine).matches()) {
 							nc.send(handleCommand(currentEntityUser,
@@ -269,7 +270,7 @@ public class Server {
 							parsedCmd = true;
 						}
 					}
-					
+
 					if (!parsedCmd) {
 						nc.send("Unrecognized command. \nUse 'help' for a list of available commands.");
 					}
@@ -292,17 +293,20 @@ public class Server {
 	private static Entity findEntity(String userName) {
 
 		for (int i = 0; i < docs.size(); i++) {
-			if (docs.get(i).getName().equals(userName)) {
+			if (docs.get(i).getName().equals(userName)
+					|| docs.get(i).getId() == Integer.parseInt(userName)) {
 				return docs.get(i);
 			}
 		}
 		for (int i = 0; i < nurses.size(); i++) {
-			if (nurses.get(i).getName().equals(userName)) {
+			if (nurses.get(i).getName().equals(userName)
+					|| nurses.get(i).getId() == Integer.parseInt(userName)) {
 				return nurses.get(i);
 			}
 		}
 		for (int i = 0; i < patients.size(); i++) {
-			if (patients.get(i).getName().equals(userName)) {
+			if (patients.get(i).getName().equals(userName)
+					|| patients.get(i).getId() == Integer.parseInt(userName)) {
 				return patients.get(i);
 			}
 		}
@@ -485,7 +489,6 @@ public class Server {
 
 			});
 
-			// inte färdig
 			put("write record", new CommandHandler() {
 
 				@Override
@@ -533,6 +536,49 @@ public class Server {
 					}
 
 					return "Deleted record";
+				}
+			});
+
+			put("create record", new CommandHandler() {
+				// "create record for patient (\\d+) with nurse (\\d+) and data (.*)"
+				@Override
+				public String handleCommand(Entity entity, Pattern p,
+						String value) {
+					System.out.println(String.format("Handling [%s] ...",
+							p.pattern()));
+
+					Matcher m = p.matcher(value);
+
+					try {
+						if (m.matches()) {
+							Patient pat = (Patient) findEntity(m.group(1));
+							Nurse n = (Nurse) findEntity(m.group(2));
+
+							if (pat == null || n == null) {
+								throw new InvalidParameterException();
+							}
+
+							if (currentEntityUser.getType() != EntityType.Doctor)
+								throw new AccessControlException("Current user is not allowed to create records");
+							
+							Record r = createJournal(pat, (Doctor)currentEntityUser, n);
+
+							if (currentEntityUser.canAccess(r,
+									EntityWithAccessControl.EXECUTE)) {
+								records.add(r);
+							}
+						}
+					} catch (AccessControlException e) {
+						return "Access Denied";
+					} 
+					catch (ClassCastException e) {
+						return "Invalid parameters";
+					}
+					catch (InvalidParameterException e) {
+						return "Invalid parameters";
+					}
+
+					return "Created record";
 				}
 			});
 
