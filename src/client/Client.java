@@ -22,9 +22,9 @@ import util.PasswordManager;
 public class Client {
 
 	private static final int PORT = 5678;
+	private static Scanner scan;
 
 	public static void main(String[] args) {
-
 
 		System.setProperty("javax.net.ssl.trustStore",
 				"./certificates/CA/truststore");
@@ -38,18 +38,18 @@ public class Client {
 		boolean notFound = true;
 		FileInputStream stream = null;
 		String pass = null;
-		String name = null;
+		String username = null;
 
 		while (notFound) {
 			try {
-				Scanner scan = new Scanner(System.in);
-				System.out.print("Namn: ");
-				name = scan.next();
-				System.out.print("Password for cert: ");
-				pass = scan.next();
+				scan = new Scanner(System.in);
+				System.out.print("Username: ");
+				username = scan.nextLine();
+				System.out.print("Certificate Passphrase: ");
+				pass = scan.nextLine();
 
-				stream = new FileInputStream("./certificates/" + name + "/"
-						+ name + ".jks");
+				stream = new FileInputStream("./certificates/" + username + "/"
+						+ username + ".jks");
 				notFound = false;
 			} catch (FileNotFoundException e) {
 				notFound = true;
@@ -89,21 +89,24 @@ public class Client {
 			NetworkCommunication nc = new NetworkCommunication(toServer,
 					fromServer);
 
-			nc.send(name);
+			nc.send(username);
 
-//			byte[] salt = nc.receiveByteArray();
-//
-//			Scanner scan = new Scanner(System.in);
-//			System.out.print("Password: ");
-//			String psw = scan.next();
-//
-//			byte[] hashUser = pwMn.getHash(1, psw, salt);
-//			nc.sendByteArray(hashUser);
+			String status = null;
+			do {
+				System.out.println("Password: ");
+				String pw = scan.nextLine();
+				nc.send(pw);
+				pw = null;
+				
+				status = nc.receive();
+				if (status == null) {
+					// Connection closed...
+					System.exit(-1);
+				}
+			} while (!status.equals("accepted"));
 
 			// Parse welcome message
 			System.out.println("Welcome: " + nc.receive());
-
-			Scanner sc = new Scanner(System.in);
 
 			// http://en.wikipedia.org/wiki/REPL
 			String response = null;
@@ -112,7 +115,7 @@ public class Client {
 				System.out.print("Enter command: ");
 
 				// Read - input from client -> server
-				userInput = sc.nextLine();
+				userInput = scan.nextLine();
 				System.out.println("Input: " + userInput);
 				nc.send(userInput);
 

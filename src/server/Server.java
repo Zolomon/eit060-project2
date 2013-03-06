@@ -53,7 +53,7 @@ public class Server {
 	private static Log log = new Log(System.out);
 	private static Entity currentEntityUser;
 	private static final int PORT = 5678;
-	private static PasswordManager pwMn = new PasswordManager();
+	private static PasswordManager pm = new PasswordManager();
 
 	public static void main(String[] args) {
 
@@ -87,9 +87,9 @@ public class Server {
 		docs.add(new Doctor("doctor10", divisions.get(1)));
 
 		// creating the hashed passwords for doctors
-		pwMn.createPassword("doctor00", "doc0");
-		pwMn.createPassword("doctor01", "doc1");
-		pwMn.createPassword("doctor10", "doc2");
+		pm.createUser("doctor00", "doc0");
+		pm.createUser("doctor01", "doc1");
+		pm.createUser("doctor10", "doc2");
 
 		/*
 		 * Create a "Nurse"-list where all working nurses at the hospital are
@@ -101,9 +101,9 @@ public class Server {
 		nurses.add(new Nurse("nurse10", divisions.get(1)));
 
 		// creating the hashed passwords for nurses
-		pwMn.createPassword("nurse00", "nur0");
-		pwMn.createPassword("nurse01", "nur1");
-		pwMn.createPassword("nurse10", "nur2");
+		pm.createUser("nurse00", "nur0");
+		pm.createUser("nurse01", "nur1");
+		pm.createUser("nurse10", "nur2");
 
 		/*
 		 * Create a "Patient" -list where patients with injuries are put in,
@@ -116,9 +116,9 @@ public class Server {
 				.get(1)));
 
 		// creating the hashed passwords for patients
-		pwMn.createPassword("patient00", "pat0");
-		pwMn.createPassword("patient01", "pat1");
-		pwMn.createPassword("patient10", "pat2");
+		pm.createUser("patient00", "pat0");
+		pm.createUser("patient01", "pat1");
+		pm.createUser("patient10", "pat2");
 
 		/*
 		 * Create a agent who is working for the government, is this case
@@ -127,7 +127,7 @@ public class Server {
 		agent = new GovernmentAgent("agent", divisions.get(7));
 
 		// creating hashed password for gov agent
-		pwMn.createPassword("agent", "age0");
+		pm.createUser("agent", "age0");
 
 		/*
 		 * Create medical "Records"-list where all medicial journals are stored.
@@ -225,19 +225,38 @@ public class Server {
 				NetworkCommunication nc = new NetworkCommunication(toClient,
 						fromClient);
 
-				String name = nc.receive();
-//				byte[] userSalt = pwMn.getSalt(name);
-//				
-//				nc.sendByteArray(userSalt);
-//				
-//				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
-//						"name has been received from client"));
+				String username = nc.receive();
+
+				String password = null;
+				int maxCount = 4;
+				int count = 1;
+				boolean authenticated = false;
+				do {
+					password = nc.receive();
+
+					authenticated = pm.authenticate(username, password);
+					if (!authenticated) {
+						nc.send("fail");
+						count++;
+					}
+				} while (!authenticated && count <= maxCount);
+
+				
+				if (count > maxCount) {
+					// Terminate connection due to too many failed attempts
+					toClient.close();
+					fromClient.close();
+					client.close();
+					continue;
+				}
+				
+				nc.send("accepted");
 
 				System.out.println("Client connected ...");
 
 				System.out.println("Logging in client ...");
 
-				currentEntityUser = findEntity(name);
+				currentEntityUser = findEntity(username);
 
 				log.updateLog(new LogEvent(Log.LVL_INFO, "Client",
 						"Client password match its entity"));

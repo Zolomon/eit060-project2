@@ -24,31 +24,6 @@ public class NetworkCommunication {
 		input.write(json + "\n");
 		input.flush();
 	}
-
-	public void sendByteArray(byte[] salt) {
-		Gson gson = new Gson();
-		
-		String json = gson.toJson(salt);
-		input.write(json + "\n");
-		input.flush();
-	}
-	
-	public byte[] receiveByteArray() {
-		Gson gson = new Gson();
-		
-		try {
-			byte[] result = gson.fromJson(output.readLine(), byte[].class);
-			return result;
-		} catch (JsonSyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
 	
 	public String receive() {
 		Gson gson = new Gson();
